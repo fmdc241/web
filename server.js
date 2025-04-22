@@ -11,16 +11,14 @@ const server = http.createServer(app);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://website_db_h6qu_user:o9Fjbjp3MEU4w4nGTwgQOsFXQxybzcBJ@dpg-d03r8obuibrs73aih370-a/website_db_h6qu',
-  ssl: {
-    rejectUnauthorized: false // Required for Render PostgreSQL
-  },
+  ssl: { rejectUnauthorized: false },
   searchPath: ['public']
 });
 
 async function initializeDatabase() {
   try {
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS "users" (
+      CREATE TABLE IF NOT EXISTS public.users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
@@ -31,74 +29,65 @@ async function initializeDatabase() {
       )
     `);
     console.log('Verified users table exists');
+    return true;
   } catch (err) {
-    console.error('Could not initialize database:', err);
+    console.error('Database initialization failed:', err);
+    return false;
   }
 }
 
-// Modify your startup sequence:
-pool.query('SELECT NOW()', async (err) => {
-  if (err) {
-    console.error('Database connection error', err.stack);
-  } else {
-    console.log('Database connected');
-    await initializeDatabase();  // Add this line
-    server.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    });
-  }
-});
-
-pool.query('SELECT NOW()', (err) => {
-  if (err) {
-    console.error('Database connection error', err.stack);
-  } else {
-    console.log('Database connected');
-    server.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    });
-  }
-});
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 async function seedAdmin() {
   try {
-    // First, verify table exists
-    const tableCheck = await pool.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'users'
-      )
-    `);
-    
-    if (!tableCheck.rows[0].exists) {
-      console.error('Users table does not exist!');
-      return;
-    }
-
     const adminUsername = 'admin';
     const adminPassword = 'admin';
     const adminEmail = 'admin@delacruzengineering.com';
 
-    // Check if admin exists - using explicit case handling
-    const result = await pool.query(`
-      SELECT * FROM "users" WHERE username = $1
-    `, [adminUsername]);
-
+    const result = await pool.query(
+      'SELECT * FROM public.users WHERE username = $1', 
+      [adminUsername]
+    );
+    
     if (result.rows.length === 0) {
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
-      await pool.query(`
-        INSERT INTO "users" 
+      await pool.query(
+        `INSERT INTO public.users 
         (username, password, full_name, email, address, is_admin) 
-        VALUES ($1, $2, $3, $4, $5, $6)
-      `, [adminUsername, hashedPassword, 'Administrator', adminEmail, 'Admin Headquarters', true]);
+        VALUES ($1, $2, $3, $4, $5, $6)`,
+        [adminUsername, hashedPassword, 'Administrator', adminEmail, 'Admin Headquarters', true]
+      );
       console.log('Admin user seeded.');
     }
   } catch (err) {
-    console.error('Error in seedAdmin:', err);
+    console.error('Admin seeding failed:', err);
   }
 }
 
-seedAdmin();
+async function startServer() {
+  try {
+    // 1. Test database connection
+    await pool.query('SELECT NOW()');
+    console.log('Database connected');
+    
+    // 2. Initialize database
+    if (!await initializeDatabase()) {
+      throw new Error('Database initialization failed');
+    }
+    
+    // 3. Seed admin user
+    await seedAdmin();
+    
+    // 4. Start server
+    server.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+    
+  } catch (err) {
+    console.error('Server startup failed:', err);
+    process.exit(1);
+  }
+}
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Start the application
+startServer();
