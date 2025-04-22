@@ -159,8 +159,6 @@
   overflow: hidden;
 }
 
-
-
 @media (min-width: 1024px) {
   #exam-container {
     flex-direction: row;
@@ -314,13 +312,6 @@
       from { opacity: 0; transform: translateY(10px);}
       to { opacity: 1; transform: none;}
     }
-
-    .modal-content {
-  pointer-events: auto;
-}
-.modal-overlay {
-  pointer-events: auto;
-}
     
 #admin-panel > section > .engineering-card {
   max-width: 900px;      /* Adjust width as needed */
@@ -787,8 +778,8 @@
 
     <!-- Exam Taking Modal -->
     <!-- Exam Taking Modal -->
-    <div class="modal-overlay hidden" id="exam-modal" onclick="handleExamOverlayClick(event)">
-      <div class="modal-content relative" style="max-width: 95%; width: 95%; max-height: 95vh; height: 95vh;">
+<div class="modal-overlay hidden" id="exam-modal">
+  <div class="modal-content relative" style="max-width: 95%; width: 95%; max-height: 95vh; height: 95vh;">
     <button class="close-btn" id="close-exam-modal">
       <i class="fas fa-times"></i>
     </button>
@@ -1286,20 +1277,25 @@ function renameCategory(oldName) {
     closeRegisterModalBtn.addEventListener('click', hideAuthForms);
 // Close exam modal button
 // Close exam modal button
-// Close exam modal button
 closeExamModalBtn.addEventListener('click', function() {
-  if (confirm('Are you sure you want to close the exam? Your progress will be saved but the timer will continue.')) {
-    // Just hide the modal but keep timer running
-    document.getElementById('exam-modal').classList.add('hidden');
-    document.body.style.overflow = '';
+  // Clear the timer interval and remove the display
+  if (window.examTimerInterval) {
+    clearInterval(window.examTimerInterval);
+    window.examTimerInterval = null;
   }
+  const timerDisplay = document.getElementById('exam-timer-display');
+  if (timerDisplay) {
+    timerDisplay.remove();
+  }
+  
+  hideAuthForms();
 });
-window.addEventListener('click', (event) => {
-  // Don't handle exam modal here - we have special handling for it
-  if (event.target === loginModal) hideAuthForms();
-  if (event.target === registerModal) hideAuthForms();
-  // Remove the examModal check from here
-});
+    // Close modals when clicking outside
+    window.addEventListener('click', (event) => {
+      if (event.target === loginModal) hideAuthForms();
+      if (event.target === registerModal) hideAuthForms();
+      if (event.target === examModal) hideAuthForms();
+    });
 
     // Switch links inside forms
     document.getElementById('switch-to-register').addEventListener('click', showRegisterForm);
@@ -1687,18 +1683,6 @@ document.getElementById('add-youtube-form').addEventListener('submit', async fun
   }
 });
 
-
-function handleExamOverlayClick(event) {
-  // Only close if clicking directly on the overlay (not on modal content)
-  if (event.target === document.getElementById('exam-modal')) {
-    // First check if user really wants to close
-    if (confirm('Are you sure you want to close the exam? Your progress will be saved but the timer will continue.')) {
-      // Just hide the modal but keep timer running
-      document.getElementById('exam-modal').classList.add('hidden');
-      document.body.style.overflow = '';
-    }
-  }
-}
 // Initialize YouTube resources
 function initYouTubeResources() {
   // Add some default De La Cruz Engineering videos if none exist
