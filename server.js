@@ -1,7 +1,7 @@
 const app = require('./app');
 const http = require('http');
 const { Pool } = require('pg');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const path = require('path');
 const express = require('express');
 require('dotenv').config();
