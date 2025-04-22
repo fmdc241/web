@@ -9,13 +9,11 @@ require('dotenv').config();
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
 
-// Test DB connection
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  connectionString: process.env.DATABASE_URL || 'postgresql://website_db_h6qu_user:o9Fjbjp3MEU4w4nGTwgQOsFXQxybzcBJ@dpg-d03r8obuibrs73aih370-a/website_db_h6qu',
+  ssl: {
+    rejectUnauthorized: false // Required for Render PostgreSQL
+  }
 });
 
 pool.query('SELECT NOW()', (err) => {
