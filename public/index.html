@@ -1,0 +1,3267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta http-equiv="Content-Security-Policy" content="img-src 'self' data: https://i.ytimg.com https://i.ibb.co https://img.youtube.com;">
+
+  <title>De La Cruz Engineering Review LMS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Source+Code+Pro&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary-color: #2a5f8a;
+      --secondary-color: #3a7ca5;
+      --accent-color: #4a9bc5;
+      --dark-color: #1a3b5a;
+      --light-color: #e6f2ff;
+      --neutral-dark: #333333;
+      --neutral-medium: #666666;
+      --neutral-light: #f5f5f5;
+    }
+    
+    body {
+      font-family: 'Roboto Condensed', sans-serif;
+      background-color: #f8fafc;
+    }
+    
+    .engineering-card {
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-left: 4px solid var(--primary-color);
+      transition: all 0.3s ease;
+    }
+    
+    .engineering-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      border-left-color: var(--accent-color);
+    }
+    
+    .engineering-btn {
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .engineering-btn:hover {
+      background: linear-gradient(to right, var(--secondary-color), var(--accent-color));
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background-color: white;
+      border-radius: 0.25rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      border-top: 4px solid var(--primary-color);
+      max-width: 28rem;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var (--neutral-medium);
+    }
+    
+    .answer-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--neutral-medium);
+      display: inline-block;
+      margin-right: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .answer-circle.selected {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--accent-color);
+      transition: background 0.2s, border 0.2s;
+    }
+    
+    .answer-circle:hover {
+      transform: scale(1.1);
+    }
+    
+    #exam-container {
+      gap: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      #exam-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Admin panel styles */
+    .admin-only {
+      display: none;
+    }
+    
+    .admin-active .admin-only {
+      display: block;
+    }
+    
+    .admin-active .user-content {
+    display: block;
+    opacity: 1;
+    height: auto;
+    overflow: visible;
+  }
+
+    /* Exam Modal Styles */
+#exam-modal .modal-content {
+  width: 95vw;
+  height: 95vh;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+}
+
+#exam-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(95vh - 180px); /* Adjust based on header/footer height */
+  gap: 1rem;
+  overflow: hidden;
+}
+
+
+
+@media (min-width: 1024px) {
+  #exam-container {
+    flex-direction: row;
+  }
+}
+
+#answer-sheet {
+  height: 100%;
+  overflow-y: auto;
+  background-color: white;
+}
+
+.pdf-viewer-container {
+  height: 100%;
+  min-height: 300px;
+}
+
+#exam-pdf-viewer {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  border: none;
+}
+
+/* Answer sheet items */
+.answer-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.answer-options {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+/* For smaller screens */
+@media (max-width: 640px) {
+  #exam-modal .modal-content {
+    width: 98vw;
+    height: 95vh;
+  }
+  
+  #exam-container {
+    height: calc(95vh - 180px);
+  }
+}
+
+/* Exam Timer Styles */
+#exam-timer-display {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  z-index: 1001; /* Above the modal */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+   /* Add this new rule to hide admin panel when navigating to other sections */
+   .admin-active .user-content:not(:target) ~ #admin-panel,
+  .admin-active #admin-panel:not(:target) {
+    display: none;
+  }
+
+  /* Show admin panel when its target is active */
+  .admin-active #admin-panel:target {
+    display: block;
+  }
+    
+    /* PDF Viewer Styles */
+    .pdf-viewer-container {
+      position: relative;
+      height: 100%;
+    }
+    
+    .pdf-navigation {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      z-index: 10;
+    }
+    
+    .pdf-navigation button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .pdf-navigation button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    .page-info {
+      color: var(--neutral-medium);
+      font-weight: bold;
+    }
+    
+    /* Engineering-themed section headers */
+    .section-header {
+      position: relative;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-header:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+    }
+    
+    /* Technical badge style */
+    .tech-badge {
+      display: inline-block;
+      background-color: var(--light-color);
+      color: var(--primary-color);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .admin-nav-btn.active,
+    .admin-nav-btn.bg-\[var\(--accent-color\)\] {
+      background: var(--accent-color);
+      color: #fff;
+    }
+    .admin-panel-content {
+      animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px);}
+      to { opacity: 1; transform: none;}
+    }
+
+    .modal-content {
+  pointer-events: auto;
+}
+.modal-overlay {
+  pointer-events: auto;
+}
+    
+#admin-panel > section > .engineering-card {
+  max-width: 900px;      /* Adjust width as needed */
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+#admin-panel .admin-panel-content {
+  min-width: 0;
+}
+@media (max-width: 950px) {
+  #admin-panel > section > .engineering-card {
+    max-width: 100%;
+  }
+}
+
+/* --- Place this inside your <style> tag --- */
+#admin-panel > section > .engineering-card {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+}
+
+/* Sidebar always on the very left, content fills the rest */
+#admin-panel aside {
+  width: 220px;
+  min-width: 180px;
+  max-width: 260px;
+  flex-shrink: 0;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+#admin-panel .admin-panel-content {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 0%;
+  padding: 2rem;
+  background: #fff;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  box-shadow: none;
+}
+
+/* Remove extra padding from .engineering-card since we use .admin-panel-content */
+#admin-panel > section > .engineering-card > .admin-panel-content {
+  padding: 0;
+}
+
+/* Responsive: stack sidebar on top for small screens */
+@media (max-width: 950px) {
+  #admin-panel > section > .engineering-card {
+    flex-direction: column;
+    max-width: 100%;
+  }
+  #admin-panel aside {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 4px 4px 0 0;
+    min-width: 0;
+  }
+  #admin-panel .admin-panel-content {
+    border-radius: 0 0 4px 4px;
+    padding: 1rem;
+  }
+}
+
+/* --- Admin Panel Sidebar Layout --- */
+#admin-panel > section {
+  display: flex;
+  justify-content: center;
+}
+
+#admin-panel > section > .engineering-card {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  max-width: 1100px; /* Wider for more content space */
+  min-height: 600px;
+  margin: 0;
+  box-sizing: border-box;
+  border-radius: 6px;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Sidebar always on the very left, fixed width */
+#admin-panel aside {
+  width: 240px;
+  min-width: 200px;
+  max-width: 260px;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: 6px 0 0 6px;
+  height: auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+/* Main content fills the rest */
+#admin-panel .admin-panel-content {
+  flex: 1 1 0%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+
+/* Remove extra padding from .engineering-card since we use .admin-panel-content */
+#admin-panel > section > .engineering-card > .admin-panel-content {
+  padding: 0;
+}
+
+/* Responsive: stack sidebar on top for small screens */
+@media (max-width: 950px) {
+  #admin-panel > section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #admin-panel > section > .engineering-card {
+    flex-direction: column;
+    max-width: 100%;
+    border-radius: 6px;
+  }
+  #admin-panel aside {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 6px 6px 0 0;
+    min-width: 0;
+  }
+  #admin-panel .admin-panel-content {
+    border-radius: 0 0 6px 6px;
+    padding: 1rem;
+  }
+}
+
+/* --- Make admin panel full screen with sidebar on the very left --- */
+#admin-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  min-height: 0;
+  min-width: 0;
+}
+
+#admin-panel > section {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+#admin-panel > section > .engineering-card {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
+/* Sidebar always on the very left, full height */
+#admin-panel aside {
+  width: 260px;
+  min-width: 200px;
+  max-width: 320px;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: 0;
+  height: 100%;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+/* Main content fills the rest */
+#admin-panel .admin-panel-content,
+#admin-panel > section > .engineering-card > .flex-1 {
+  flex: 1 1 0%;
+  min-width: 0;
+  max-width: 100%;
+  height: 100%;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  overflow-y: auto;
+}
+
+/* Remove extra padding from .engineering-card since we use .admin-panel-content */
+#admin-panel > section > .engineering-card > .admin-panel-content {
+  padding: 0;
+}
+
+/* Responsive: stack sidebar on top for small screens */
+@media (max-width: 950px) {
+  #admin-panel {
+    flex-direction: column;
+  }
+  #admin-panel > section {
+    flex-direction: column;
+  }
+  #admin-panel > section > .engineering-card {
+    flex-direction: column;
+    height: 100%;
+  }
+  #admin-panel aside {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  #admin-panel .admin-panel-content {
+    border-radius: 0;
+    padding: 1rem;
+    height: 100%;
+  }
+  /* Exam Timer Styles */
+#exam-timer-display {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  z-index: 1001; /* Above the modal */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Exam Modal Styles */
+#exam-modal .modal-content {
+  width: 95vw;
+  height: 90vh;
+  max-width: 1200px; /* Maximum width for larger screens */
+  display: flex;
+  flex-direction: column;
+}
+
+#exam-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1rem;
+  height: calc(90vh - 150px); /* Adjust based on your header/footer height */
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  #exam-container {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+  }
+}
+
+#answer-sheet {
+  height: 100%;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+}
+
+.pdf-viewer-container {
+  height: 100%;
+  min-height: 300px; /* Minimum height for mobile */
+}
+
+#exam-pdf-viewer {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  border: none;
+}
+
+/* Answer sheet items */
+.answer-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.answer-options {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+/* For smaller screens */
+@media (max-width: 640px) {
+  #exam-modal .modal-content {
+    width: 98vw;
+    height: 95vh;
+  }
+  
+  #exam-container {
+    height: calc(95vh - 150px);
+  }
+}
+  
+}
+  </style>
+
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Header / Navbar -->
+  <header class="bg-white shadow-md sticky top-0 z-50 border-b-4 border-[var(--primary-color)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+      <a class="flex items-center space-x-3" href="#" id="nav-home-link">
+        <img alt="De La Cruz Engineering Review logo" class="h-10 w-auto" src="https://i.ibb.co/VcQTnys7/logo.png"/>
+        <span class="text-2xl font-bold text-[var(--primary-color)] flex items-center">
+          <i class="fas fa-cogs mr-2"></i>De La Cruz Engineering Review
+        </span>
+      </a>
+ <!-- In your header navigation, update the links like this: -->
+<nav class="hidden md:flex space-x-8 text-[var(--neutral-dark)] font-semibold" id="nav-links">
+  <a class="hover:text-[var(--primary-color)] transition" href="#dashboard" id="nav-dashboard">Dashboard</a>
+  <a class="hover:text-[var(--primary-color)] transition" href="#contents" id="nav-contents">Contents</a>
+  <a class="hover:text-[var(--primary-color)] transition" href="#exams" id="nav-exams">Exams</a>
+  <a class="hover:text-[var(--primary-color)] transition" href="#resources" id="nav-resources">Resources</a>
+  <a class="hover:text-[var(--primary-color)] transition admin-only" href="#admin-panel" id="nav-admin">Admin Panel</a>
+</nav>
+      <div class="hidden md:flex items-center space-x-4" id="nav-auth">
+        <button class="text-[var(--primary-color)] font-semibold hover:underline flex items-center" id="login-btn">
+          <i class="fas fa-sign-in-alt mr-1"></i> login
+        </button>
+        <button class="text-[var(--primary-color)] font-semibold hover:underline flex items-center" id="register-btn">
+          <i class="fas fa-user-plus mr-1"></i> Register
+        </button>
+        <button class="text-[var(--primary-color)] font-semibold hover:underline hidden flex items-center" id="logout-btn">
+          <i class="fas fa-sign-out-alt mr-1"></i> Logout
+        </button>
+      </div>
+      <button aria-label="Toggle menu" class="md:hidden text-[var(--neutral-dark)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="mobile-menu-button">
+        <i class="fas fa-bars fa-lg"></i>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <nav aria-label="Mobile menu" class="hidden md:hidden bg-white border-t border-gray-200" id="mobile-menu">
+      <!-- In your mobile menu, ensure links have the same structure -->
+<a class="block px-4 py-3 text-[var(--neutral-dark)] font-semibold hover:bg-[var(--light-color)]" href="#dashboard" id="mobile-nav-dashboard">Dashboard</a>
+<a class="block px-4 py-3 text-[var(--neutral-dark)] font-semibold hover:bg-[var(--light-color)]" href="#contents" id="mobile-nav-contents">Contents</a>
+<a class="block px-4 py-3 text-[var(--neutral-dark)] font-semibold hover:bg-[var(--light-color)]" href="#exams" id="mobile-nav-exams">Exams</a>
+<a class="block px-4 py-3 text-[var(--neutral-dark)] font-semibold hover:bg-[var(--light-color)]" href="#resources" id="mobile-nav-resources">Resources</a>
+<a class="block px-4 py-3 text-[var(--neutral-dark)] font-semibold hover:bg-[var(--light-color)] admin-only" href="#admin-panel" id="mobile-nav-admin">Admin Panel</a>
+      <div class="border-t border-gray-200 mt-2 pt-2 flex flex-col space-y-1 px-4">
+        <button class="text-[var(--primary-color)] font-semibold hover:underline text-left flex items-center" id="mobile-login-btn">
+          <i class="fas fa-sign-in-alt mr-2"></i> Login
+        </button>
+        <button class="text-[var(--primary-color)] font-semibold hover:underline text-left flex items-center" id="mobile-register-btn">
+          <i class="fas fa-user-plus mr-2"></i> Register
+        </button>
+        <button class="text-[var(--primary-color)] font-semibold hover:underline text-left hidden flex items-center" id="mobile-logout-btn">
+          <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Login Form Modal -->
+    <div class="modal-overlay hidden" id="login-modal">
+      <div class="modal-content relative">
+        <button class="close-btn" id="close-login-modal">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="p-6">
+          <h2 class="text-2xl font-bold text-[var(--primary-color)] mb-4 text-center flex items-center justify-center">
+            <i class="fas fa-sign-in-alt mr-2"></i> Login
+          </h2>
+          <form id="login-form" class="space-y-4">
+            <div>
+              <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="login-username">Username</label>
+              <input autocomplete="username" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="login-username" required="" type="text"/>
+            </div>
+            <div>
+              <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="login-password">Password</label>
+              <input autocomplete="current-password" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="login-password" required="" type="password"/>
+            </div>
+            <button class="w-full engineering-btn py-2 rounded transition" type="submit">Login</button>
+            <p class="text-center text-sm text-[var(--neutral-medium)] mt-2">
+              Don't have an account? <button class="text-[var(--primary-color)] font-semibold hover:underline" id="switch-to-register" type="button">Register here</button>.
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Register Form Modal -->
+    <div class="modal-overlay hidden" id="register-modal">
+      <div class="modal-content relative">
+        <button class="close-btn" id="close-register-modal">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="p-6">
+          <h2 class="text-2xl font-bold text-[var(--primary-color)] mb-4 text-center flex items-center justify-center">
+            <i class="fas fa-user-plus mr-2"></i> Register
+          </h2>
+          <form id="register-form" class="space-y-4">
+            <div>
+              <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="register-fullname">Full Name</label>
+              <input autocomplete="name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="register-fullname" minlength="3" required="" type="text"/>
+            </div>
+            <div>
+              <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="register-email">Email</label>
+              <input autocomplete="email" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="register-email" required="" type="email"/>
+            </div>
+            <div>
+              <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="register-address">Address</label>
+              <input autocomplete="street-address" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="register-address" minlength="3" required="" type="text"/>
+            </div>
+            <div>
+              <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="register-password">Password</label>
+              <input autocomplete="new-password" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="register-password" minlength="6" required="" type="password"/>
+            </div>
+            <button class="w-full engineering-btn py-2 rounded transition" type="submit">Register</button>
+            <p class="text-center text-sm text-[var(--neutral-medium)] mt-2">
+              Already have an account? <button class="text-[var(--primary-color)] font-semibold hover:underline" id="switch-to-login" type="button">Login here</button>.
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exam Taking Modal -->
+    <!-- Exam Taking Modal -->
+    <div class="modal-overlay hidden" id="exam-modal" onclick="handleExamOverlayClick(event)">
+      <div class="modal-content relative" style="max-width: 95%; width: 95%; max-height: 95vh; height: 95vh;">
+    <button class="close-btn" id="close-exam-modal">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="p-6 h-full flex flex-col">
+      <h2 class="text-2xl font-bold text-[var(--primary-color)] mb-4 text-center" id="exam-modal-title">Exam Title</h2>
+      
+      <!-- Main exam container with answer sheet and PDF viewer -->
+      <div id="exam-container" class="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        <!-- Answer Sheet Column (Left) -->
+        <div class="flex flex-col h-full w-full lg:w-1/3 bg-[var(--light-color)] p-4 rounded-lg overflow-y-auto">
+          <h3 class="text-xl font-semibold text-[var(--neutral-dark)] mb-3">Answer Sheet</h3>
+          <div id="answer-sheet" class="flex-1">
+            <!-- Answer sheet will be generated here -->
+          </div>
+        </div>
+        
+        <!-- PDF Viewer Column (Right) -->
+        <div class="flex flex-col h-full w-full lg:w-2/3">
+          <h3 class="text-xl font-semibold text-[var(--neutral-dark)] mb-3">Exam Questions</h3>
+          <div class="pdf-viewer-container flex-1 relative border border-gray-300 rounded-lg">
+            <iframe id="exam-pdf-viewer" class="w-full h-full"></iframe>
+            <div id="pdf-navigation" class="pdf-navigation hidden">
+              <button id="prev-page" disabled><i class="fas fa-chevron-left mr-1"></i>Previous</button>
+              <span class="page-info" id="page-info">Page 1 of 1</span>
+              <button id="next-page" disabled><i class="fas fa-chevron-right ml-1"></i>Next</button>
+            </div>
+            <div id="pdf-loading" class="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
+              <div class="text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-color)] mb-2"></div>
+                <p class="text-[var(--neutral-dark)]">Loading exam questions...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Submit button at bottom center -->
+      <div class="flex justify-center mt-4">
+        <div class="text-center">
+          <p class="text-red-600 hidden" id="exam-warning">You have unanswered questions!</p>
+          <button class="engineering-btn py-2 px-6 rounded transition" id="submit-exam">Submit Exam</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Main Content (User View) -->
+    <div class="user-content">
+      <!-- Dashboard Section -->
+      <section class="mb-12" id="dashboard">
+        <div class="engineering-card p-6">
+          <h1 class="text-3xl font-extrabold text-[var(--dark-color)] mb-4 flex items-center">
+            <i class="fas fa-cogs mr-3"></i>Welcome to De La Cruz Engineering Review LMS
+          </h1>
+          <p class="text-[var(--neutral-dark)] max-w-3xl" id="welcome-message">
+            This platform is designed to help engineering students access comprehensive review materials, exams, and resources uploaded by the admin. Navigate through the sections below to start learning or managing content.
+          </p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <div class="engineering-card p-5">
+              <i class="fas fa-book-open text-3xl text-[var(--primary-color)] mb-3"></i>
+              <h3 class="text-xl font-semibold">Study Materials</h3>
+              <p class="mt-2 text-[var(--neutral-medium)]">Access comprehensive engineering review materials</p>
+            </div>
+            <div class="engineering-card p-5">
+              <i class="fas fa-clipboard-check text-3xl text-[var(--primary-color)] mb-3"></i>
+              <h3 class="text-xl font-semibold">Practice Exams</h3>
+              <p class="mt-2 text-[var(--neutral-medium)]">Test your knowledge with timed practice tests</p>
+            </div>
+            <div class="engineering-card p-5">
+              <i class="fas fa-chart-line text-3xl text-[var(--primary-color)] mb-3"></i>
+              <h3 class="text-xl font-semibold">Progress Tracking</h3>
+              <p class="mt-2 text-[var(--neutral-medium)]">Monitor your improvement over time</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Table of Contents Section -->
+      <!-- Replace the existing TOC section with this -->
+<section class="mb-12" id="contents">
+  <div class="engineering-card p-6">
+    <div class="section-header">
+      <h2 class="text-2xl font-bold text-[var(--dark-color)]">Table of Contents</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="toc-list">
+      <!-- TOC items will be loaded here dynamically -->
+    </div>
+  </div>
+</section>
+
+      <!-- Exams Section -->
+      <section class="mb-12" id="exams">
+        <div class="engineering-card p-6">
+          <div class="section-header">
+            <h2 class="text-2xl font-bold text-[var(--dark-color)]">Exams</h2>
+          </div>
+          <div class="space-y-6" id="exams-list">
+            <div class="engineering-card p-6 flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--neutral-dark)] flex items-center">
+                  <i class="fas fa-calculator mr-2"></i>Engineering Mathematics Midterm Exam
+                </h3>
+                <p class="text-[var(--neutral-medium)]">50 multiple choice questions covering limits, differentiation, and integration.</p>
+                <div class="mt-2">
+                  <span class="tech-badge"><i class="fas fa-clock mr-1"></i>60 min</span>
+                  <span class="tech-badge"><i class="fas fa-question-circle mr-1"></i>50 Qs</span>
+                </div>
+              </div>
+              <button class="mt-4 md:mt-0 engineering-btn take-exam" data-exam-id="exam1" data-exam-title="Engineering Mathematics Midterm Exam" data-exam-pdf="https://example.com/exams/engineering-math-midterm.pdf" data-questions="50">
+                <i class="fas fa-pen mr-2"></i>Take Exam
+              </button>
+            </div>
+            <div class="engineering-card p-6 flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--neutral-dark)] flex items-center">
+                  <i class="fas fa-tachometer-alt mr-2"></i>Engineering Mechanics Final Exam
+                </h3>
+                <p class="text-[var(--neutral-medium)]">Comprehensive exam with problems on statics, dynamics, and materials strength.</p>
+                <div class="mt-2">
+                  <span class="tech-badge"><i class="fas fa-clock mr-1"></i>90 min</span>
+                  <span class="tech-badge"><i class="fas fa-question-circle mr-1"></i>40 Qs</span>
+                </div>
+              </div>
+              <button class="mt-4 md:mt-0 engineering-btn take-exam" data-exam-id="exam2" data-exam-title="Engineering Mechanics Final Exam" data-exam-pdf="https://example.com/exams/engineering-mechanics-final.pdf" data-questions="40">
+                <i class="fas fa-pen mr-2"></i>Take Exam
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resources Section -->
+      <!-- Replace the existing resources section with this -->
+<section class="mb-12" id="resources">
+  <div class="engineering-card p-6">
+    <div class="section-header">
+      <h2 class="text-2xl font-bold text-[var(--dark-color)] flex items-center">
+        <i class="fab fa-youtube mr-2"></i>Video Resources
+      </h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" id="resources-list">
+      <!-- YouTube resources will be loaded here dynamically -->
+    </div>
+  </div>
+</section>
+    </div>
+
+    <!-- Admin Panel Content (Hidden by default) -->
+ <!-- Admin Panel Content (Hidden by default) -->
+<div class="admin-only" id="admin-panel">
+  <section class="mb-12">
+    <div class="engineering-card p-0 flex flex-col md:flex-row min-h-[600px]">
+      <!-- Sidebar Navigation -->
+      <aside class="bg-[var(--primary-color)] text-white w-full md:w-64 flex-shrink-0 flex flex-col">
+        <div class="p-6 border-b border-[var(--accent-color)]">
+          <h1 class="text-2xl font-bold flex items-center">
+            <i class="fas fa-user-cog mr-2"></i> Admin Panel
+          </h1>
+          <!-- Back to Dashboard Button -->
+          <button
+            onclick="window.location.hash='#dashboard';"
+            class="mt-4 w-full flex items-center justify-center px-4 py-2 bg-[var(--accent-color)] hover:bg-[var(--secondary-color)] text-white font-semibold rounded transition"
+            style="font-size: 1rem;"
+            id="admin-back-dashboard"
+          >
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+          </button>
+        </div>
+        <nav class="flex-1 flex flex-col py-4 space-y-2">
+          <button class="admin-nav-btn px-6 py-3 text-left hover:bg-[var(--accent-color)] focus:bg-[var(--accent-color)] transition font-semibold flex items-center active"
+            data-panel="students-panel">
+            <i class="fas fa-users mr-3"></i> Manage Students
+          </button>
+          <button class="admin-nav-btn px-6 py-3 text-left hover:bg-[var(--accent-color)] focus:bg-[var(--accent-color)] transition font-semibold flex items-center"
+            data-panel="exams-panel">
+            <i class="fas fa-clipboard-list mr-3"></i> Exams
+          </button>
+          <button class="admin-nav-btn px-6 py-3 text-left hover:bg-[var(--accent-color)] focus:bg-[var(--accent-color)] transition font-semibold flex items-center"
+            data-panel="toc-panel">
+            <i class="fas fa-book mr-3"></i> Table of Contents
+          </button>
+          <button class="admin-nav-btn px-6 py-3 text-left hover:bg-[var(--accent-color)] focus:bg-[var(--accent-color)] transition font-semibold flex items-center"
+            data-panel="youtube-panel">
+            <i class="fab fa-youtube mr-3"></i> YouTube Resources
+          </button>
+        </nav>
+      </aside>
+      <!-- Main Content Area -->
+      <div class="flex-1 p-8 bg-white rounded-r-lg shadow-inner">
+        <!-- Students Panel -->
+        <div id="students-panel" class="admin-panel-content">
+          <h2 class="text-2xl font-bold text-[var(--primary-color)] mb-6 flex items-center">
+            <i class="fas fa-users mr-3"></i> Manage Students
+          </h2>
+          <!-- Students Table -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-[var(--light-color)]">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-[var(--neutral-dark)] uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-[var(--neutral-dark)] uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-[var(--neutral-dark)] uppercase tracking-wider">Address</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-[var(--neutral-dark)] uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200" id="students-list">
+                <!-- Students will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Exams Panel -->
+        <div id="exams-panel" class="admin-panel-content hidden">
+          <h2 class="text-2xl font-bold text-[var(--primary-color)] mb-6 flex items-center">
+            <i class="fas fa-clipboard-list mr-3"></i> Exams
+          </h2>
+          <!-- Add Exam Form -->
+          <div class="mb-8">
+            <!-- In the exams-panel section, update the form -->
+<form class="space-y-4" id="add-exam-form">
+  <div>
+    <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="exam-title">Exam Title</label>
+    <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="exam-title" type="text" required>
+  </div>
+  <div>
+    <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="exam-description">Description</label>
+    <textarea class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="exam-description" rows="3" required></textarea>
+  </div>
+  <div>
+    <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="exam-pdf">PDF File</label>
+    <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="exam-pdf" type="file" accept=".pdf" required>
+  </div>
+  <div>
+    <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="exam-questions">Number of Questions</label>
+    <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="exam-questions" type="number" min="1" required>
+  </div>
+  <div>
+    <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="exam-timer">Time Limit (minutes)</label>
+    <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="exam-timer" type="number" min="1" value="60" required>
+  </div>
+  <div id="correct-answers-container" class="hidden">
+    <label class="block text-[var(--neutral-dark)] font-semibold mb-2">Correct Answers</label>
+    <div id="correct-answers-inputs" class="grid grid-cols-5 gap-2"></div>
+  </div>
+  <button type="submit" class="engineering-btn">
+    <i class="fas fa-plus mr-2"></i>Add Exam
+  </button>
+</form>
+          </div>
+          <!-- Current Exams -->
+          <div>
+            <h3 class="text-xl font-medium text-[var(--neutral-dark)] mb-4 flex items-center">
+              <i class="fas fa-list-alt mr-2"></i>Current Exams
+            </h3>
+            <div class="space-y-4" id="current-exams">
+              <!-- Exams will be populated here -->
+            </div>
+          </div>
+          <!-- Exam Scores -->
+          <div class="mt-8">
+            <h3 class="text-xl font-medium text-[var(--neutral-dark)] mb-4 flex items-center">
+              <i class="fas fa-clipboard-check mr-2"></i>Exam Scores
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-[var(--light-color)]">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-[var(--neutral-dark)] uppercase tracking-wider">Student</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-[var(--neutral-dark)] uppercase tracking-wider">Exam</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-[var(--neutral-dark)] uppercase tracking-wider">Score</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-[var(--neutral-dark)] uppercase tracking-wider">Date Taken</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-[var(--neutral-dark)] uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="exam-scores-list">
+                  <!-- Exam scores will be populated here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- TOC Panel -->
+        <div id="toc-panel" class="admin-panel-content hidden">
+          <h2 class="text-2xl font-bold text-[var(--primary-color)] mb-6 flex items-center">
+            <i class="fas fa-book mr-3"></i> Table of Contents
+          </h2>
+          <form class="space-y-4 mb-6" id="add-toc-form">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="toc-category">Category</label>
+                <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="toc-category" type="text" required>
+              </div>
+              <div>
+                <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="toc-topic">Topic</label>
+                <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="toc-topic" type="text" required>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="toc-link">Link URL</label>
+              <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="toc-link" type="url" required>
+            </div>
+            <button type="submit" class="engineering-btn">
+              <i class="fas fa-plus mr-2"></i>Add to TOC
+            </button>
+          </form>
+          <div class="space-y-6" id="toc-management">
+            <!-- TOC items will be populated here -->
+          </div>
+        </div>
+        <!-- YouTube Resources Panel -->
+        <div id="youtube-panel" class="admin-panel-content hidden">
+          <h2 class="text-2xl font-bold text-[var(--primary-color)] mb-6 flex items-center">
+            <i class="fab fa-youtube mr-3"></i> YouTube Resources
+          </h2>
+          <form class="space-y-4 mb-6" id="add-youtube-form">
+            <div>
+              <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="youtube-title">Title</label>
+              <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="youtube-title" type="text" required>
+            </div>
+            <div>
+              <label class="block text-[var(--neutral-dark)] font-semibold mb-1" for="youtube-url">YouTube URL</label>
+              <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" id="youtube-url" type="url" placeholder="https://www.youtube.com/watch?v=..." required>
+            </div>
+            <button type="submit" class="engineering-btn">
+              <i class="fas fa-plus mr-2"></i>Add YouTube Resource
+            </button>
+          </form>
+          <div class="space-y-4" id="youtube-resources-list">
+            <!-- YouTube resources will be populated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+  </main>
+
+  <footer class="bg-[var(--neutral-dark)] text-white py-8 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-lg font-bold mb-4 flex items-center">
+            <i class="fas fa-cogs mr-2"></i> De La Cruz Engineering
+          </h3>
+          <p>Providing quality engineering education since 2019.</p>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold mb-4">Quick Links</h3>
+          <ul class="space-y-2">
+            <li><a href="#dashboard" class="hover:text-[var(--light-color)] flex items-center"><i class="fas fa-chevron-right mr-2 text-xs"></i>Dashboard</a></li>
+            <li><a href="#contents" class="hover:text-[var(--light-color)] flex items-center"><i class="fas fa-chevron-right mr-2 text-xs"></i>Table of Contents</a></li>
+            <li><a href="#exams" class="hover:text-[var(--light-color)] flex items-center"><i class="fas fa-chevron-right mr-2 text-xs"></i>Exams</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold mb-4">Contact</h3>
+          <p class="flex items-center"><i class="fas fa-envelope mr-2"></i> contact@delacruzengineering.com</p>
+          <p class="mt-2 flex items-center"><i class="fas fa-phone mr-2"></i> (123) 456-7890</p>
+          <p class="mt-2 flex items-center"><i class="fas fa-map-marker-alt mr-2"></i> 123 Engineering Ave, Tech City</p>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-8 pt-6 text-center">
+        © 2024 De La Cruz Engineering Review. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Elements for auth and nav
+    const loginBtn = document.getElementById('login-btn');
+    const registerBtn = document.getElementById('register-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const navAdminLink = document.getElementById('nav-admin');
+    const mobileLoginBtn = document.getElementById('mobile-login-btn');
+    const mobileRegisterBtn = document.getElementById('mobile-register-btn');
+    const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+    const mobileNavAdminLink = document.getElementById('mobile-nav-admin');
+
+    // Modal elements
+    const loginModal = document.getElementById('login-modal');
+    const registerModal = document.getElementById('register-modal');
+    const examModal = document.getElementById('exam-modal');
+    const closeLoginModalBtn = document.getElementById('close-login-modal');
+    const closeRegisterModalBtn = document.getElementById('close-register-modal');
+    const closeExamModalBtn = document.getElementById('close-exam-modal');
+
+
+    // Tab functionality for admin panel
+    function setupAdminTabs() {
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+  
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      tabButtons.forEach(btn => btn.classList.remove('active', 'border-b-2', 'border-[var(--primary-color)]', 'text-[var(--primary-color)]'));
+      tabContents.forEach(content => content.classList.add('hidden'));
+      button.classList.add('active', 'border-b-2', 'border-[var(--primary-color)]', 'text-[var(--primary-color)]');
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.remove('hidden');
+
+      // --- FIX: Use loadTOCAdmin for the admin TOC tab ---
+      if (tabId === 'toc-tab') {
+        loadTOCAdmin();
+      }
+    });
+  });
+}
+
+function loadAdminManagement() {
+  loadStudentsList();
+  loadExamScores();
+  loadCurrentExams();
+  loadTOCManagement();
+  loadTOCAdmin(); // Use this!
+  loadYouTubeResourcesAdmin();
+}
+    // Show login modal
+    function showLoginForm() {
+      registerModal.classList.add('hidden');
+      loginModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('login-username').focus();
+    }
+
+    // Show register modal
+    function showRegisterForm() {
+      loginModal.classList.add('hidden');
+      registerModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('register-fullname').focus();
+    }
+
+    // Hide all modals
+    function hideAuthForms() {
+      loginModal.classList.add('hidden');
+      registerModal.classList.add('hidden');
+      examModal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Add these new functions to your JavaScript
+// Function to delete an entire category
+function deleteCategory(categoryName) {
+  if (!confirm(`Delete the entire "${categoryName}" category and all its contents?`)) return;
+  
+  const toc = getTOC();
+  const updatedTOC = toc.filter(item => item.category !== categoryName);
+  saveTOC(updatedTOC);
+  
+  // Refresh both views
+  loadTOC();
+  loadTOCAdmin();
+}
+
+function renameCategory(oldName) {
+  const newName = prompt("Enter new category name:", oldName);
+  if (!newName || newName.trim() === "" || newName === oldName) return;
+
+  const toc = getTOC();
+  const updatedTOC = toc.map(item => 
+    item.category === oldName ? {...item, category: newName} : item
+  );
+  
+  saveTOC(updatedTOC);
+  
+  // Refresh both views
+  loadTOC();
+  loadTOCAdmin();
+}
+
+
+    // Event listeners for nav buttons
+    loginBtn.addEventListener('click', showLoginForm);
+    registerBtn.addEventListener('click', showRegisterForm);
+    mobileLoginBtn.addEventListener('click', () => {
+      showLoginForm();
+      mobileMenu.classList.add('hidden');
+    });
+    mobileRegisterBtn.addEventListener('click', () => {
+      showRegisterForm();
+      mobileMenu.classList.add('hidden');
+    });
+
+    // Close modal buttons
+    closeLoginModalBtn.addEventListener('click', hideAuthForms);
+    closeRegisterModalBtn.addEventListener('click', hideAuthForms);
+// Close exam modal button
+// Close exam modal button
+// Close exam modal button
+closeExamModalBtn.addEventListener('click', function() {
+  if (confirm('Are you sure you want to close the exam? Your progress will be saved but the timer will continue.')) {
+    // Just hide the modal but keep timer running
+    document.getElementById('exam-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+});
+window.addEventListener('click', (event) => {
+  // Don't handle exam modal here - we have special handling for it
+  if (event.target === loginModal) hideAuthForms();
+  if (event.target === registerModal) hideAuthForms();
+  // Remove the examModal check from here
+});
+
+    // Switch links inside forms
+    document.getElementById('switch-to-register').addEventListener('click', showRegisterForm);
+    document.getElementById('switch-to-login').addEventListener('click', showLoginForm);
+
+    // PDF Navigation variables
+    let currentPdfPage = 1;
+
+    // Function to update PDF navigation buttons
+    function updatePdfNavigation() {
+      const prevBtn = document.getElementById('prev-page');
+      const nextBtn = document.getElementById('next-page');
+      const pageInfo = document.getElementById('page-info');
+      
+      const pdfViewer = document.getElementById('exam-pdf-viewer');
+      const currentPage = parseInt(pdfViewer.src.split('#page=')[1] || 1);
+      
+      prevBtn.disabled = currentPage <= 1;
+      pageInfo.textContent = `Page ${currentPage}`;
+    }
+
+    // Event listeners for PDF navigation
+    document.getElementById('prev-page').addEventListener('click', () => {
+      const pdfViewer = document.getElementById('exam-pdf-viewer');
+      const currentPage = parseInt(pdfViewer.src.split('#page=')[1] || 1);
+      if (currentPage > 1) {
+        pdfViewer.src = pdfViewer.src.split('#')[0] + `#page=${currentPage - 1}`;
+        updatePdfNavigation();
+      }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+      const pdfViewer = document.getElementById('exam-pdf-viewer');
+      const currentPage = parseInt(pdfViewer.src.split('#page=')[1] || 1);
+      pdfViewer.src = pdfViewer.src.split('#')[0] + `#page=${currentPage + 1}`;
+      updatePdfNavigation();
+    });
+
+    // Storage keys
+    const USERS_KEY = 'dlc_users';
+    const SESSION_KEY = 'dlc_session';
+    const EXAMS_KEY = 'dlc_exams';
+    const SCORES_KEY = 'dlc_scores';
+    const TOC_KEY = 'dlc_toc';
+
+    // Default admin user
+    const defaultAdmin = { 
+      username: 'admin', 
+      password: 'admin', 
+      isAdmin: true,
+      fullName: 'Administrator',
+      email: 'admin@delacruzengineering.com',
+      address: 'Admin Headquarters'
+    };
+
+    // Add to your existing JavaScript
+const YOUTUBE_RESOURCES_KEY = 'dlc_youtube_resources';
+
+// Function to extract YouTube video ID from URL
+function getYouTubeId(url) {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
+// Add these functions to your existing JavaScript
+function loadTOC() {
+  const toc = getTOC();
+  const tocList = document.getElementById('toc-list');
+  tocList.innerHTML = '';
+
+  // Group by category
+  const categories = {};
+  toc.forEach(item => {
+    if (!categories[item.category]) {
+      categories[item.category] = [];
+    }
+    categories[item.category].push(item);
+  });
+
+  // Display each category
+  for (const category in categories) {
+    const categoryDiv = document.createElement('article');
+    categoryDiv.className = 'engineering-card p-6';
+    
+    const categoryTitle = document.createElement('h3');
+    categoryTitle.className = 'text-xl font-semibold text-[var(--neutral-dark)] mb-2';
+    categoryTitle.textContent = category;
+    
+    const topicsList = document.createElement('ul');
+    topicsList.className = 'list-disc list-inside text-[var(--neutral-medium)] space-y-1';
+    
+    categories[category].forEach(item => {
+      const topicItem = document.createElement('li');
+      const topicLink = document.createElement('a');
+      topicLink.className = 'text-[var(--primary-color)] hover:underline';
+      topicLink.href = item.link;
+      topicLink.target = '_blank';
+      topicLink.rel = 'noopener noreferrer';
+      topicLink.textContent = item.topic;
+      
+      topicItem.appendChild(topicLink);
+      topicsList.appendChild(topicItem);
+    });
+    
+    categoryDiv.appendChild(categoryTitle);
+    categoryDiv.appendChild(topicsList);
+    tocList.appendChild(categoryDiv);
+  }
+}
+
+function loadTOCAdmin() {
+  const toc = getTOC();
+  const tocManagement = document.getElementById('toc-management');
+  tocManagement.innerHTML = '';
+
+  // Group items by category
+  const categories = {};
+  toc.forEach(item => {
+    if (!categories[item.category]) {
+      categories[item.category] = [];
+    }
+    categories[item.category].push(item);
+  });
+
+  // Create UI for each category
+  for (const [categoryName, items] of Object.entries(categories)) {
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = 'engineering-card p-4 mb-4';
+    
+    // Category header with ALWAYS VISIBLE controls
+    categoryDiv.innerHTML = `
+      <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
+        <div class="flex items-center">
+          <i class="fas fa-folder text-yellow-500 mr-2"></i>
+          <h4 class="text-lg font-semibold">${categoryName}</h4>
+        </div>
+        <div class="flex space-x-2">
+          <button class="text-blue-600 hover:text-blue-800 px-2 py-1 rounded rename-category" 
+                  data-category="${categoryName}">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="text-red-600 hover:text-red-800 px-2 py-1 rounded delete-category" 
+                  data-category="${categoryName}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <ul class="space-y-2 pl-6">
+        ${items.map(item => `
+          <li class="flex justify-between items-center py-1">
+            <a href="${item.link}" target="_blank" class="text-blue-600 hover:underline">
+              ${item.topic}
+            </a>
+            <button class="text-red-500 hover:text-red-700 delete-item" data-id="${item.id}">
+              <i class="fas fa-times"></i>
+            </button>
+          </li>
+        `).join('')}
+      </ul>
+    `;
+    
+    tocManagement.appendChild(categoryDiv);
+  }
+
+  // Add event listeners for category actions
+  document.querySelectorAll('.delete-category').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const category = this.dataset.category;
+      deleteCategory(category);
+    });
+  });
+
+  document.querySelectorAll('.rename-category').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const category = this.dataset.category;
+      renameCategory(category);
+    });
+  });
+
+  // Add event listeners for item deletion
+  document.querySelectorAll('.delete-item').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const itemId = this.dataset.id;
+      if (confirm('Delete this item?')) {
+        const toc = getTOC().filter(item => item.id !== itemId);
+        saveTOC(toc);
+        loadTOCAdmin(); // Refresh the TOC admin view
+      }
+    });
+  });
+}
+
+// Remove any other duplicate event listeners for this form
+// Update your existing TOC form submission
+document.getElementById('add-toc-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const category = document.getElementById('toc-category').value.trim();
+  const topic = document.getElementById('toc-topic').value.trim();
+  const linkUrl = document.getElementById('toc-link').value.trim(); // <-- camelCase
+
+  if (!category || !topic || !linkUrl) {
+    alert('Please fill in all fields.');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/toc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ category, topic, linkUrl }) // <-- camelCase
+    });
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.message || 'Failed to add TOC item');
+    }
+    this.reset();
+    await loadTOC();
+    if (typeof loadTOCAdmin === 'function') await loadTOCAdmin();
+    alert('TOC item added successfully!');
+  } catch (err) {
+    alert(err.message || 'Failed to add TOC item');
+  }
+});
+
+function showError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  const error = document.createElement('div');
+  error.className = 'error-message text-red-600 text-sm mt-1';
+  error.textContent = message;
+  field.parentNode.appendChild(error);
+}
+
+function showValidationError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  const error = document.createElement('p');
+  error.className = 'validation-error text-red-600 text-sm mt-1';
+  error.textContent = message;
+  field.parentNode.appendChild(error);
+}
+
+
+function deleteTOCItem(index) {
+  const toc = getTOC();
+  if (index >= 0 && index < toc.length) {
+    if (confirm('Are you sure you want to delete this TOC item?')) {
+      toc.splice(index, 1);
+      saveTOC(toc);
+      loadTOC();
+      loadTOCAdmin();
+    }
+  }
+}
+
+// Update the TOC form submission
+
+
+// Remove the default TOC initialization from initData()
+function initData() {
+  if (!localStorage.getItem(USERS_KEY)) {
+    localStorage.setItem(USERS_KEY, JSON.stringify([defaultAdmin]));
+  }
+  if (!localStorage.getItem(EXAMS_KEY)) {
+    localStorage.setItem(EXAMS_KEY, JSON.stringify([]));
+  }
+  if (!localStorage.getItem(SCORES_KEY)) {
+    localStorage.setItem(SCORES_KEY, JSON.stringify([]));
+  }
+  if (!localStorage.getItem(TOC_KEY)) {
+    // Initialize with at least one category and item
+    localStorage.setItem(TOC_KEY, JSON.stringify([
+      {
+        id: 'default_1',
+        category: 'Sample Category',
+        topic: 'Sample Topic',
+        link: '#'
+      }
+    ]));
+  }
+  if (!localStorage.getItem(YOUTUBE_RESOURCES_KEY)) {
+    localStorage.setItem(YOUTUBE_RESOURCES_KEY, JSON.stringify([]));
+  }
+}
+
+
+// Function to load YouTube resources
+function loadYouTubeResources() {
+  const resources = JSON.parse(localStorage.getItem(YOUTUBE_RESOURCES_KEY)) || [];
+  const resourcesList = document.getElementById('resources-list');
+  resourcesList.innerHTML = '';
+
+  resources.forEach(resource => {
+    const videoId = getYouTubeId(resource.url);
+    const resourceElement = document.createElement('a');
+    resourceElement.className = 'engineering-card p-5 flex flex-col items-center text-center hover:shadow-lg transition';
+    resourceElement.href = resource.url;
+    resourceElement.target = '_blank';
+    resourceElement.rel = 'noopener noreferrer';
+    resourceElement.innerHTML = `
+      <img alt="${resource.title}" class="mb-4 w-full h-auto object-cover rounded" src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg">
+      <h3 class="font-semibold text-[var(--neutral-dark)]">${resource.title}</h3>
+      <p class="text-[var(--neutral-medium)] mt-1 text-sm">YouTube Video</p>
+    `;
+    resourcesList.appendChild(resourceElement);
+  });
+}
+
+// Function to load YouTube resources in admin panel
+function loadYouTubeResourcesAdmin() {
+  const resources = JSON.parse(localStorage.getItem(YOUTUBE_RESOURCES_KEY)) || [];
+  const resourcesList = document.getElementById('youtube-resources-list');
+  resourcesList.innerHTML = '';
+
+  resources.forEach((resource, index) => {
+    const videoId = getYouTubeId(resource.url);
+    const resourceElement = document.createElement('div');
+    resourceElement.className = 'engineering-card p-4 flex items-center justify-between';
+    resourceElement.innerHTML = `
+      <div class="flex items-center">
+        <img alt="${resource.title}" class="w-16 h-12 object-cover rounded mr-4" src="https://img.youtube.com/vi/${videoId}/default.jpg">
+        <div>
+          <h4 class="font-medium">${resource.title}</h4>
+          <a href="${resource.url}" target="_blank" class="text-[var(--primary-color)] hover:underline text-sm">View Video</a>
+        </div>
+      </div>
+      <button class="text-red-600 hover:text-red-900 delete-youtube" data-index="${index}">
+        <i class="fas fa-trash"></i>
+      </button>
+    `;
+    resourcesList.appendChild(resourceElement);
+  });
+
+  // Add event listeners for delete buttons
+  document.querySelectorAll('.delete-youtube').forEach(btn => {
+    btn.addEventListener('click', function() {
+      deleteYouTubeResource(parseInt(this.dataset.index));
+    });
+  });
+}
+
+// Function to delete YouTube resource
+function deleteYouTubeResource(index) {
+  if (confirm('Are you sure you want to delete this YouTube resource?')) {
+    const resources = JSON.parse(localStorage.getItem(YOUTUBE_RESOURCES_KEY)) || [];
+    resources.splice(index, 1);
+    localStorage.setItem(YOUTUBE_RESOURCES_KEY, JSON.stringify(resources));
+    loadYouTubeResources();
+    loadYouTubeResourcesAdmin();
+  }
+}
+
+// Handle YouTube form submission
+document.getElementById('add-youtube-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const title = document.getElementById('youtube-title').value.trim();
+  const url = document.getElementById('youtube-url').value.trim();
+
+  if (!title || !url) {
+    alert('Please fill in all fields.');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/youtube', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ title, url })
+    });
+    if (!response.ok) throw new Error('Failed to add YouTube resource');
+    this.reset();
+    await loadYouTubeResources();
+    alert('YouTube resource added successfully!');
+  } catch (err) {
+    alert(err.message || 'Failed to add YouTube resource');
+  }
+});
+
+
+function handleExamOverlayClick(event) {
+  // Only close if clicking directly on the overlay (not on modal content)
+  if (event.target === document.getElementById('exam-modal')) {
+    // First check if user really wants to close
+    if (confirm('Are you sure you want to close the exam? Your progress will be saved but the timer will continue.')) {
+      // Just hide the modal but keep timer running
+      document.getElementById('exam-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  }
+}
+// Initialize YouTube resources
+function initYouTubeResources() {
+  // Add some default De La Cruz Engineering videos if none exist
+  if (!localStorage.getItem(YOUTUBE_RESOURCES_KEY)) {
+    const defaultVideos = [
+      {
+        title: "Engineering Mathematics Basics",
+        url: "https://www.youtube.com/watch?v=EXAMPLE1"
+      },
+      {
+        title: "Mechanics Fundamentals",
+        url: "https://www.youtube.com/watch?v=EXAMPLE2"
+      }
+    ];
+    localStorage.setItem(YOUTUBE_RESOURCES_KEY, JSON.stringify(defaultVideos));
+  }
+}
+
+// Update your init function to include YouTube resources
+
+
+    // Add this to your existing JavaScript
+function handleNavigation() {
+  // Show the target section and hide others
+  const targetId = window.location.hash || '#dashboard';
+  
+  if (targetId === '#admin-panel') {
+    document.getElementById('admin-panel').style.display = 'block';
+    document.querySelector('.user-content').style.display = 'none';
+  } else {
+    document.getElementById('admin-panel').style.display = 'none';
+    document.querySelector('.user-content').style.display = 'block';
+    document.querySelector(targetId)?.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+// Call this function on page load and hash change
+window.addEventListener('load', handleNavigation);
+window.addEventListener('hashchange', handleNavigation);
+
+// Update your existing navigation event listeners to use this
+document.querySelectorAll('nav a').forEach(link => {
+  link.addEventListener('click', function(e) {
+    if (this.getAttribute('href').startsWith('#')) {
+      e.preventDefault();
+      window.location.hash = this.getAttribute('href');
+      handleNavigation();
+    }
+  });
+});
+
+    // Default TOC items
+    const defaultTOC = [
+      {
+        id: 'toc_1',
+        category: 'Engineering Mathematics',
+        topic: 'Limits and Continuity',
+        link: 'https://example.com/engineering-math/limits'
+      },
+      {
+        id: 'toc_2',
+        category: 'Engineering Mathematics',
+        topic: 'Differentiation Techniques',
+        link: 'https://example.com/engineering-math/differentiation'
+      },
+      {
+        id: 'toc_3',
+        category: 'Engineering Mathematics',
+        topic: 'Integration Methods',
+        link: 'https://example.com/engineering-math/integration'
+      },
+      {
+        id: 'toc_4',
+        category: 'Engineering Mathematics',
+        topic: 'Linear Algebra Basics',
+        link: 'https://example.com/engineering-math/linear-algebra'
+      },
+      {
+        id: 'toc_5',
+        category: 'Engineering Mechanics',
+        topic: 'Statics Fundamentals',
+        link: 'https://example.com/engineering-mechanics/statics'
+      },
+      {
+        id: 'toc_6',
+        category: 'Engineering Mechanics',
+        topic: 'Dynamics Principles',
+        link: 'https://example.com/engineering-mechanics/dynamics'
+      },
+      {
+        id: 'toc_7',
+        category: 'Engineering Mechanics',
+        topic: 'Materials Strength',
+        link: 'https://example.com/engineering-mechanics/materials'
+      },
+      {
+        id: 'toc_8',
+        category: 'Engineering Mechanics',
+        topic: 'Fluid Mechanics Overview',
+        link: 'https://example.com/engineering-mechanics/fluid-mechanics'
+      },
+      {
+        id: 'toc_9',
+        category: 'Electrical Engineering',
+        topic: 'Circuit Analysis',
+        link: 'https://example.com/electrical-engineering/circuits'
+      },
+      {
+        id: 'toc_10',
+        category: 'Electrical Engineering',
+        topic: 'Electronics Basics',
+        link: 'https://example.com/electrical-engineering/electronics'
+      },
+      {
+        id: 'toc_11',
+        category: 'Electrical Engineering',
+        topic: 'Signals and Systems',
+        link: 'https://example.com/electrical-engineering/signals'
+      },
+      {
+        id: 'toc_12',
+        category: 'Electrical Engineering',
+        topic: 'Power Systems',
+        link: 'https://example.com/electrical-engineering/power-systems'
+      },
+      {
+        id: 'toc_13',
+        category: 'Thermodynamics',
+        topic: 'First Law of Thermodynamics',
+        link: 'https://example.com/thermodynamics/first-law'
+      },
+      {
+        id: 'toc_14',
+        category: 'Thermodynamics',
+        topic: 'Second Law of Thermodynamics',
+        link: 'https://example.com/thermodynamics/second-law'
+      },
+      {
+        id: 'toc_15',
+        category: 'Thermodynamics',
+        topic: 'Heat Transfer',
+        link: 'https://example.com/thermodynamics/heat-transfer'
+      },
+      {
+        id: 'toc_16',
+        category: 'Thermodynamics',
+        topic: 'Entropy Concepts',
+        link: 'https://example.com/thermodynamics/entropy'
+      }
+    ];
+
+    // Default exams
+    const defaultExams = [
+      {
+        id: 'exam1',
+        title: 'Engineering Mathematics Midterm Exam',
+        description: '50 multiple choice questions covering limits, differentiation, and integration.',
+        pdfName: 'engineering-math-midterm.pdf',
+        pdfUrl: 'https://example.com/exams/engineering-math-midterm.pdf',
+        questions: 50
+      },
+      {
+        id: 'exam2',
+        title: 'Engineering Mechanics Final Exam',
+        description: 'Comprehensive exam with problems on statics, dynamics, and materials strength.',
+        pdfName: 'engineering-mechanics-final.pdf',
+        pdfUrl: 'https://example.com/exams/engineering-mechanics-final.pdf',
+        questions: 40
+      }
+    ];
+
+    function loadStudentExams() {
+      const exams = getExams();
+      const examsList = document.getElementById('exams-list');
+      examsList.innerHTML = '';
+
+      exams.forEach(exam => {
+        const examDiv = document.createElement('div');
+        examDiv.className = 'engineering-card p-6 flex flex-col md:flex-row md:items-center md:justify-between';
+        examDiv.innerHTML = `
+          <div>
+            <h3 class="text-lg font-semibold text-[var(--neutral-dark)] flex items-center">
+              <i class="fas ${exam.title.includes('Math') ? 'fa-calculator' : 'fa-tachometer-alt'} mr-2"></i>${exam.title}
+            </h3>
+            <p class="text-[var(--neutral-medium)]">${exam.description}</p>
+            <div class="mt-2">
+              <span class="tech-badge"><i class="fas fa-clock mr-1"></i>${exam.questions > 40 ? '90 min' : '60 min'}</span>
+              <span class="tech-badge"><i class="fas fa-question-circle mr-1"></i>${exam.questions} Qs</span>
+            </div>
+          </div>
+          <button class="mt-4 md:mt-0 engineering-btn take-exam" 
+                  data-exam-id="${exam.id}" 
+                  data-exam-title="${exam.title}" 
+                  data-exam-pdf="${exam.pdfUrl}" 
+                  data-questions="${exam.questions}">
+            <i class="fas fa-pen mr-2"></i>Take Exam
+          </button>
+        `;
+        examsList.appendChild(examDiv);
+      });
+
+      // Re-attach event listeners to exam buttons
+      
+    }
+
+    // Initialize data in localStorage if not present
+    function initData() {
+      if (!localStorage.getItem(USERS_KEY)) {
+        localStorage.setItem(USERS_KEY, JSON.stringify([defaultAdmin]));
+      }
+      if (!localStorage.getItem(EXAMS_KEY)) {
+        localStorage.setItem(EXAMS_KEY, JSON.stringify(defaultExams));
+      }
+      if (!localStorage.getItem(SCORES_KEY)) {
+        localStorage.setItem(SCORES_KEY, JSON.stringify([]));
+      }
+      if (!localStorage.getItem(TOC_KEY)) {
+        localStorage.setItem(TOC_KEY, JSON.stringify(defaultTOC));
+      }
+    }
+
+    // Get users from localStorage
+    function getUsers() {
+      return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+    }
+
+    // Save users to localStorage
+    function saveUsers(users) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+
+    // Get current session user
+    function getSessionUser() {
+  try {
+    const sessionData = localStorage.getItem('dlc_session');
+    return sessionData ? JSON.parse(sessionData) : null;
+  } catch (error) {
+    console.error('Session parse error:', error);
+    return null;
+  }
+}
+
+    // Save session user
+    function saveSessionUser(user) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    }
+
+    // Clear session user
+    function clearSessionUser() {
+      localStorage.removeItem(SESSION_KEY);
+    }
+
+    // Get exams from localStorage
+    function getExams() {
+      return JSON.parse(localStorage.getItem(EXAMS_KEY)) || [];
+    }
+
+    // Save exams to localStorage
+    function saveExams(exams) {
+      localStorage.setItem(EXAMS_KEY, JSON.stringify(exams));
+    }
+
+    // Get scores from localStorage
+    function getScores() {
+      return JSON.parse(localStorage.getItem(SCORES_KEY)) || [];
+    }
+
+    // Save scores to localStorage
+    function saveScores(scores) {
+      localStorage.setItem(SCORES_KEY, JSON.stringify(scores));
+    }
+
+    // Get TOC from localStorage
+    function getTOC() {
+      return JSON.parse(localStorage.getItem(TOC_KEY)) || [];
+    }
+
+    // Save TOC to localStorage
+    function saveTOC(toc) {
+      localStorage.setItem(TOC_KEY, JSON.stringify(toc));
+    }
+
+   // Replace localStorage functions with API calls
+   async function handleLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.token || !data.user) {
+      throw new Error(data.message || 'Login failed');
+    }
+
+    // Store token and user in localStorage
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('dlc_session', JSON.stringify(data.user));
+
+    // Hide login modal
+    hideAuthForms();
+
+    // Change hash first (this triggers handleNavigation)
+    if (data.user.isAdmin) {
+      window.location.hash = '#admin-panel';
+    } else {
+      window.location.hash = '#dashboard';
+    }
+
+    // Now update UI (after hash change)
+    updateUI();
+
+    // Show welcome message
+    alert(`Welcome, ${data.user.fullName || data.user.username}!`);
+  } catch (error) {
+    alert(error.message || JSON.stringify(error) || 'Login failed');
+  }
+}
+
+async function handleRegister() {
+  const fullName = document.getElementById('register-fullname').value.trim();
+  const email = document.getElementById('register-email').value.trim();
+  const address = document.getElementById('register-address').value.trim();
+  const password = document.getElementById('register-password').value;
+  
+  // Generate username from email
+  const username = email.split('@')[0].toLowerCase();
+
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password, fullName, email, address }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Registration failed');
+    }
+
+    alert('Registration successful! You can now log in.');
+    showLoginForm();
+    document.getElementById('register-form').reset();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// Add this to your JavaScript
+document.getElementById('exam-questions').addEventListener('input', function() {
+  const questionCount = parseInt(this.value);
+  const container = document.getElementById('correct-answers-inputs');
+  const answersContainer = document.getElementById('correct-answers-container');
+  
+  container.innerHTML = '';
+  
+  if (questionCount > 0) {
+    answersContainer.classList.remove('hidden');
+    
+    for (let i = 1; i <= questionCount; i++) {
+      const div = document.createElement('div');
+      div.className = 'flex flex-col';
+      div.innerHTML = `
+        <label class="text-sm mb-1">Q${i}</label>
+        <select class="border rounded p-1 correct-answer" data-question="${i}" required>
+          <option value="">Select</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+        </select>
+      `;
+      container.appendChild(div);
+    }
+  } else {
+    answersContainer.classList.add('hidden');
+  }
+});
+
+// Update the exam submission handler
+
+
+function handleLogout() {
+  localStorage.removeItem('token');
+  updateUI();
+  alert('You have been logged out.');
+}
+
+async function getCurrentUser() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+
+  try {
+    const response = await fetch('/api/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      // Only remove token if 401/403 (unauthorized)
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('token');
+      }
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    // Only remove token if error is unauthorized
+    return null;
+  }
+}
+
+function getYouTubeThumbnail(videoUrl) {
+  const videoId = videoUrl.split('v=')[1].split('&')[0];
+  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+}
+
+    // Handle register
+    async function handleRegister() {
+  const fullName = document.getElementById('register-fullname').value.trim();
+  const email = document.getElementById('register-email').value.trim();
+  const address = document.getElementById('register-address').value.trim();
+  const password = document.getElementById('register-password').value;
+  
+  // Generate username from email
+  const username = email.split('@')[0].toLowerCase();
+
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password, fullName, email, address }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Registration failed');
+    }
+
+    alert('Registration successful! You can now log in.');
+    showLoginForm();
+    document.getElementById('register-form').reset();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+    // Handle logout
+    function handleLogout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('dlc_session');
+  updateUI();
+  alert('You have been logged out.');
+}
+
+  
+
+    async function loadStudentExams() {
+  try {
+    const response = await fetch('/api/exams', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Unauthorized or failed to load exams');
+    }
+    const exams = await response.json();
+    if (!Array.isArray(exams)) throw new Error('Exams data is not an array');
+    
+    const examsList = document.getElementById('exams-list');
+    examsList.innerHTML = '';
+
+    exams.forEach(exam => {
+      const examDiv = document.createElement('div');
+      examDiv.className = 'engineering-card p-6 flex flex-col md:flex-row md:items-center md:justify-between';
+      examDiv.innerHTML = `
+        <div>
+          <h3 class="text-lg font-semibold text-[var(--neutral-dark)] flex items-center">
+            <i class="fas ${exam.title.includes('Math') ? 'fa-calculator' : 'fa-tachometer-alt'} mr-2"></i>${exam.title}
+          </h3>
+          <p class="text-[var(--neutral-medium)]">${exam.description}</p>
+          <div class="mt-2">
+            <span class="tech-badge"><i class="fas fa-clock mr-1"></i>${exam.question_count > 40 ? '90 min' : '60 min'}</span>
+            <span class="tech-badge"><i class="fas fa-question-circle mr-1"></i>${exam.question_count} Qs</span>
+          </div>
+        </div>
+        <button class="mt-4 md:mt-0 engineering-btn take-exam" 
+                data-exam-id="${exam.id}" 
+                data-exam-title="${exam.title}" 
+                data-exam-pdf="${exam.pdf_url}" 
+                data-questions="${exam.question_count}">
+          <i class="fas fa-pen mr-2"></i>Take Exam
+        </button>
+      `;
+      examsList.appendChild(examDiv);
+    });
+
+    // Re-attach event listeners to exam buttons
+    // Update the exam modal opening code
+// Update the exam modal opening code
+document.querySelectorAll('.take-exam').forEach(btn => {
+  btn.addEventListener('click', async function() {
+    const user = await getCurrentUser();
+    if (!user) {
+      alert('Please log in to take exams.');
+      showLoginForm();
+      return;
+    }
+    
+    const examTitle = this.dataset.examTitle;
+    const examPdf = this.dataset.examPdf;
+    const questions = parseInt(this.dataset.questions);
+    const timerMinutes = parseInt(this.dataset.timer) || 60;
+    
+    document.getElementById('exam-modal-title').textContent = examTitle;
+    
+    // Set up PDF viewer
+    const pdfViewer = document.getElementById('exam-pdf-viewer');
+    const pdfLoading = document.getElementById('pdf-loading');
+    pdfLoading.classList.remove('hidden');
+    // Set fixed dimensions for the PDF viewer
+    const pdfContainer = document.querySelector('.pdf-viewer-container');
+    pdfContainer.style.height = '100%';
+    pdfContainer.style.minHeight = '300px';
+    
+    // Set fixed dimensions for the answer sheet
+    const answerSheet = document.getElementById('answer-sheet');
+    answerSheet.style.height = '100%';
+    answerSheet.style.overflowY = 'auto';
+    
+    // Set PDF source directly
+    pdfViewer.src = examPdf + '#toolbar=0&navpanes=0';
+    
+    pdfViewer.onload = function() {
+      pdfLoading.classList.add('hidden');
+      document.getElementById('pdf-navigation').classList.remove('hidden');
+      updatePdfNavigation();
+    };
+    
+    // Set up timer display - MOVED HERE FROM LOGIN FORM
+    const timerDisplay = document.createElement('div');
+    timerDisplay.id = 'exam-timer-display';
+    document.body.appendChild(timerDisplay); // Add to body instead of modal
+    
+    // Start the timer
+    startExamTimer(timerMinutes * 60);
+    
+    document.getElementById('submit-exam').dataset.questions = questions;
+    document.getElementById('submit-exam').dataset.examId = this.dataset.examId;
+    document.getElementById('exam-warning').classList.add('hidden');
+    generateAnswerSheet(questions);
+    
+    examModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  });
+});
+
+// Timer functions
+// Timer functions
+// Timer functions
+function startExamTimer(durationInSeconds) {
+  // Clear any existing timer
+  if (window.examTimerInterval) {
+    clearInterval(window.examTimerInterval);
+  }
+  
+  // Remove any existing timer display
+  const existingTimer = document.getElementById('exam-timer-display');
+  if (existingTimer) {
+    existingTimer.remove();
+  }
+
+  let timer = durationInSeconds;
+  const timerDisplay = document.createElement('div');
+  timerDisplay.id = 'exam-timer-display';
+  document.body.appendChild(timerDisplay);
+  
+  // Initial display
+  timerDisplay.textContent = formatTime(timer);
+  timerDisplay.style.display = 'block';
+  
+  // Update every second
+  window.examTimerInterval = setInterval(() => {
+    timer--;
+    timerDisplay.textContent = formatTime(timer);
+    
+    // Flash when under 1 minute
+    if (timer <= 60) {
+      timerDisplay.style.backgroundColor = '#e74c3c';
+      if (timer % 2 === 0) {
+        timerDisplay.style.transform = 'scale(1.05)';
+      } else {
+        timerDisplay.style.transform = 'scale(1)';
+      }
+    }
+    
+    if (timer <= 0) {
+      clearInterval(window.examTimerInterval);
+      window.examTimerInterval = null;
+      alert('Time is up! Your exam will be automatically submitted.');
+      document.getElementById('submit-exam').click();
+    }
+  }, 1000);
+}
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+  } catch (error) {
+    console.error('Error loading exams:', error);
+  }
+}
+
+async function submitExam() {
+  const questions = parseInt(this.dataset.questions);
+  const examId = this.dataset.examId;
+  
+  // Validate all questions are answered
+  if (!checkExamCompletion(questions)) {
+    document.getElementById('exam-warning').classList.remove('hidden');
+    return;
+  }
+  
+  // Format answers as {1: "A", 2: "B", ...}
+  const answers = {};
+  for (let i = 1; i <= questions; i++) {
+    const selected = document.querySelector(`input[name="answer_${i}"]:checked`);
+    answers[i] = selected ? selected.value : null;
+  }
+
+  try {
+    // Stop and hide the timer before submission
+    if (window.examTimerInterval) {
+      clearInterval(window.examTimerInterval);
+      window.examTimerInterval = null;
+    }
+    const timerDisplay = document.getElementById('exam-timer-display');
+    if (timerDisplay) {
+      timerDisplay.remove();
+    }
+
+    const response = await fetch(`/api/exams/${examId}/results`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ answers })
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.message || 'Submission failed');
+    }
+
+    // Show results to user
+    alert(`Exam submitted! Score: ${result.score}% (${result.correct}/${result.total} correct)`);
+    
+    hideAuthForms();
+    loadExamScores();
+
+  } catch (error) {
+    console.error('Submission error:', error);
+    alert(`Error: ${error.message}`);
+  }
+}
+async function loadTOC() {
+  try {
+    const response = await fetch('/api/toc');
+    const tocData = await response.json();
+    
+    const tocList = document.getElementById('toc-list');
+    tocList.innerHTML = '';
+
+    // Display each category
+    for (const category in tocData) {
+      const categoryDiv = document.createElement('article');
+      categoryDiv.className = 'engineering-card p-6';
+      
+      const categoryTitle = document.createElement('h3');
+      categoryTitle.className = 'text-xl font-semibold text-[var(--neutral-dark)] mb-2';
+      categoryTitle.textContent = category;
+      
+      const topicsList = document.createElement('ul');
+      topicsList.className = 'list-disc list-inside text-[var(--neutral-medium)] space-y-1';
+      
+      tocData[category].forEach(item => {
+        const topicItem = document.createElement('li');
+        const topicLink = document.createElement('a');
+        topicLink.className = 'text-[var(--primary-color)] hover:underline';
+        topicLink.href = item.link_url;
+        topicLink.target = '_blank';
+        topicLink.rel = 'noopener noreferrer';
+        topicLink.textContent = item.topic;
+        
+        topicItem.appendChild(topicLink);
+        topicsList.appendChild(topicItem);
+      });
+      
+      categoryDiv.appendChild(categoryTitle);
+      categoryDiv.appendChild(topicsList);
+      tocList.appendChild(categoryDiv);
+    }
+  } catch (error) {
+    console.error('Error loading TOC:', error);
+  }
+}
+
+async function loadYouTubeResources() {
+  try {
+    const response = await fetch('/api/youtube');
+    const resources = await response.json();
+    
+    const resourcesList = document.getElementById('resources-list');
+    resourcesList.innerHTML = '';
+
+    resources.forEach(resource => {
+      const resourceElement = document.createElement('a');
+      resourceElement.className = 'engineering-card p-5 flex flex-col items-center text-center hover:shadow-lg transition';
+      resourceElement.href = resource.url;
+      resourceElement.target = '_blank';
+      resourceElement.rel = 'noopener noreferrer';
+      resourceElement.innerHTML = `
+        <img alt="${resource.title}" class="mb-4 w-full h-auto object-cover rounded" src="https://img.youtube.com/vi/${resource.video_id}/hqdefault.jpg">
+        <h3 class="font-semibold text-[var(--neutral-dark)]">${resource.title}</h3>
+        <p class="text-[var(--neutral-medium)] mt-1 text-sm">YouTube Video</p>
+      `;
+      resourcesList.appendChild(resourceElement);
+    });
+  } catch (error) {
+    console.error('Error loading YouTube resources:', error);
+  }
+}
+
+    // Attach new logout handler
+    document.getElementById('logout-btn').addEventListener('click', handleLogout);
+    document.getElementById('mobile-logout-btn').addEventListener('click', () => {
+      handleLogout();
+      mobileMenu.classList.add('hidden');
+    });
+
+    // Attach new exam submit handler
+    document.getElementById('submit-exam').addEventListener('click', submitExam);
+
+    // Update login/register form handlers
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      handleLogin();
+    });
+
+    document.getElementById('register-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      handleRegister();
+    });
+
+    // ADMIN PANEL FUNCTIONS
+
+    // Load all admin management data
+    function loadAdminManagement() {
+      loadStudentsList();
+      loadExamScores();
+      loadCurrentExams();
+      loadTOCManagement();
+    }
+
+    // Load students list for admin
+    async function loadStudentsList(page = 1) {
+  const studentsList = document.getElementById('students-list');
+  studentsList.innerHTML = '';
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/users', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch users');
+    const users = await response.json();
+
+    // Filter out admins
+    const students = users.filter(user => !user.isAdmin);
+
+    // Pagination logic
+    const totalPages = Math.ceil(students.length / STUDENTS_PER_PAGE);
+    studentsPage = Math.max(1, Math.min(page, totalPages));
+    const start = (studentsPage - 1) * STUDENTS_PER_PAGE;
+    const end = start + STUDENTS_PER_PAGE;
+    const studentsToShow = students.slice(start, end);
+
+    studentsToShow.forEach(user => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap">${user.full_name || user.fullName || user.username}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${user.email}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${user.address}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <button class="text-red-600 hover:text-red-900 delete-student" data-id="${user.id}">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </td>
+      `;
+      studentsList.appendChild(row);
+    });
+
+    // Add pagination controls
+    let pagination = document.getElementById('students-pagination');
+    if (!pagination) {
+      pagination = document.createElement('div');
+      pagination.id = 'students-pagination';
+      pagination.className = 'flex justify-end items-center mt-2 space-x-2';
+      studentsList.parentNode.appendChild(pagination);
+    }
+    pagination.innerHTML = `
+      <button class="engineering-btn px-4 py-1" ${studentsPage === 1 ? 'disabled' : ''} id="students-prev">Previous</button>
+      <span class="mx-2">Page ${studentsPage} of ${totalPages || 1}</span>
+      <button class="engineering-btn px-4 py-1" ${studentsPage === totalPages || totalPages === 0 ? 'disabled' : ''} id="students-next">Next</button>
+    `;
+    document.getElementById('students-prev').onclick = () => loadStudentsList(studentsPage - 1);
+    document.getElementById('students-next').onclick = () => loadStudentsList(studentsPage + 1);
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-student').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const userId = this.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this student?')) {
+          await deleteStudent(userId);
+          loadStudentsList(studentsPage);
+        }
+      });
+    });
+  } catch (error) {
+    studentsList.innerHTML = `<tr><td colspan="4" class="text-red-600 px-6 py-4">Failed to load students</td></tr>`;
+  }
+}
+
+// Update deleteStudent to use the API
+async function deleteStudent(userId) {
+  const token = localStorage.getItem('token');
+  await fetch(`/api/users/${userId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+}
+
+    // Load exam scores for admin
+    async function loadExamScores(page = 1) {
+  const examScoresList = document.getElementById('exam-scores-list');
+  examScoresList.innerHTML = '';
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/exams/results/all', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch exam scores');
+    const scores = await response.json();
+
+    // Pagination logic
+    const totalPages = Math.ceil(scores.length / SCORES_PER_PAGE);
+    scoresPage = Math.max(1, Math.min(page, totalPages));
+    const start = (scoresPage - 1) * SCORES_PER_PAGE;
+    const end = start + SCORES_PER_PAGE;
+    const scoresToShow = scores.slice(start, end);
+
+    scoresToShow.forEach(score => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap">${score.student_name || score.studentName || score.full_name || score.username}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${score.exam_title || score.examTitle}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${score.score}%</td>
+        <td class="px-6 py-4 whitespace-nowrap">${new Date(score.created_at || score.date).toLocaleDateString()}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <button class="text-red-600 hover:text-red-900 delete-score" data-id="${score.id}">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </td>
+      `;
+      examScoresList.appendChild(row);
+    });
+
+    // Add pagination controls
+    let pagination = document.getElementById('scores-pagination');
+    if (!pagination) {
+      pagination = document.createElement('div');
+      pagination.id = 'scores-pagination';
+      pagination.className = 'flex justify-end items-center mt-2 space-x-2';
+      examScoresList.parentNode.appendChild(pagination);
+    }
+    pagination.innerHTML = `
+      <button class="engineering-btn px-4 py-1" ${scoresPage === 1 ? 'disabled' : ''} id="scores-prev">Previous</button>
+      <span class="mx-2">Page ${scoresPage} of ${totalPages || 1}</span>
+      <button class="engineering-btn px-4 py-1" ${scoresPage === totalPages || totalPages === 0 ? 'disabled' : ''} id="scores-next">Next</button>
+    `;
+    document.getElementById('scores-prev').onclick = () => loadExamScores(scoresPage - 1);
+    document.getElementById('scores-next').onclick = () => loadExamScores(scoresPage + 1);
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-score').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const scoreId = this.getAttribute('data-id');
+        deleteScore(scoreId);
+      });
+    });
+  } catch (error) {
+    examScoresList.innerHTML = `<tr><td colspan="5" class="text-red-600 px-6 py-4">Failed to load exam scores</td></tr>`;
+  }
+}
+
+    // Delete an exam score
+    function deleteScore(scoreId) {
+      if (confirm('Are you sure you want to delete this score record?')) {
+        const scores = getScores().filter(score => score.id !== scoreId);
+        saveScores(scores);
+        loadExamScores();
+        alert('Score record deleted successfully');
+      }
+    }
+
+    // Load current exams for management
+    function loadCurrentExams() {
+      const exams = getExams();
+      const currentExams = document.getElementById('current-exams');
+      currentExams.innerHTML = '';
+
+      exams.forEach(exam => {
+        const examDiv = document.createElement('div');
+        examDiv.className = 'engineering-card p-4 flex justify-between items-center';
+        examDiv.innerHTML = `
+          <div>
+            <h4 class="font-medium">${exam.title}</h4>
+            <p class="text-[var(--neutral-medium)] text-sm">${exam.description}</p>
+            <p class="text-[var(--neutral-medium)] text-sm mt-1">Questions: ${exam.questions} | PDF: ${exam.pdfName}</p>
+          </div>
+          <div>
+            <button class="text-red-600 hover:text-red-900 delete-exam" data-id="${exam.id}">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        `;
+        currentExams.appendChild(examDiv);
+      });
+
+      // Add event listeners for delete buttons
+      document.querySelectorAll('.delete-exam').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const examId = this.getAttribute('data-id');
+          deleteExam(examId);
+        });
+      });
+    }
+
+    // Delete an exam
+    function deleteExam(examId) {
+      if (confirm('Are you sure you want to delete this exam?')) {
+        const exams = getExams().filter(exam => exam.id !== examId);
+        saveExams(exams);
+        
+         // Also remove any scores for this student
+         const scores = getScores().filter(score => score.studentUsername !== username);
+         saveScores(scores);
+        
+        loadCurrentExams();
+        alert('Exam deleted successfully');
+      }
+    }
+
+    // Load TOC for management
+    // ...inside loadTOCManagement()...
+
+    function loadTOCManagement() {
+  const toc = getTOC();
+  const tocManagement = document.getElementById('toc-management');
+  tocManagement.innerHTML = '';
+
+  // Group by category
+  const categories = {};
+  toc.forEach(item => {
+    if (!categories[item.category]) {
+      categories[item.category] = [];
+    }
+    categories[item.category].push(item);
+  });
+
+  // Display each category
+  for (const category in categories) {
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = 'engineering-card p-4 mb-4';
+
+    // Category header with icons
+    categoryDiv.innerHTML = `
+      <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
+        <div class="flex items-center">
+          <i class="fas fa-folder text-yellow-500 mr-2"></i>
+          <h4 class="text-lg font-semibold">${category}</h4>
+        </div>
+        <div class="flex space-x-2">
+          <button class="rename-category text-blue-600 hover:text-blue-800 px-2 py-1 rounded" title="Rename Category" data-category="${category}">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="delete-category text-red-600 hover:text-red-800 px-2 py-1 rounded" title="Delete Category" data-category="${category}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <ul class="space-y-2 pl-6">
+        ${categories[category].map(item => `
+          <li class="flex justify-between items-center py-1">
+            <a href="${item.link}" target="_blank" class="text-[var(--primary-color)] hover:underline">${item.topic}</a>
+            <span>
+              <button class="rename-toc-item text-blue-600 hover:text-blue-800 px-2 py-1 rounded" title="Rename Topic" data-id="${item.id}">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="delete-toc-item text-red-600 hover:text-red-800 px-2 py-1 rounded" title="Delete Topic" data-id="${item.id}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </span>
+          </li>
+        `).join('')}
+      </ul>
+    `;
+
+    tocManagement.appendChild(categoryDiv);
+  }
+
+  // Add event listeners for category rename/delete
+  document.querySelectorAll('.rename-category').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const oldCategory = this.dataset.category;
+      const newCategory = prompt('Enter new category name:', oldCategory);
+      if (newCategory && newCategory.trim() && newCategory !== oldCategory) {
+        const toc = getTOC().map(item =>
+          item.category === oldCategory ? { ...item, category: newCategory.trim() } : item
+        );
+        saveTOC(toc);
+        loadTOCManagement();
+        loadTOC();
+      }
+    });
+  });
+
+  document.querySelectorAll('.delete-category').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const category = this.dataset.category;
+      if (confirm(`Delete the entire "${category}" category and all its topics?`)) {
+        const toc = getTOC().filter(item => item.category !== category);
+        saveTOC(toc);
+        loadTOCManagement();
+        loadTOC();
+      }
+    });
+  });
+
+  // Add event listeners for topic rename/delete
+  document.querySelectorAll('.rename-toc-item').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const tocId = this.getAttribute('data-id');
+      const toc = getTOC();
+      const item = toc.find(i => i.id === tocId);
+      if (!item) return;
+      const newTopic = prompt('Enter new topic name:', item.topic);
+      if (newTopic && newTopic.trim() && newTopic !== item.topic) {
+        item.topic = newTopic.trim();
+        saveTOC(toc);
+        loadTOCManagement();
+        loadTOC();
+      }
+    });
+  });
+
+  document.querySelectorAll('.delete-toc-item').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const tocId = this.getAttribute('data-id');
+      if (confirm('Are you sure you want to delete this topic?')) {
+        const toc = getTOC().filter(item => item.id !== tocId);
+        saveTOC(toc);
+        loadTOCManagement();
+        loadTOC();
+      }
+    });
+  });
+}
+
+// ...existing code...
+
+    // Delete a TOC item
+    function deleteTOCItem(tocId) {
+      if (confirm('Are you sure you want to delete this TOC item?')) {
+        const toc = getTOC().filter(item => item.id !== tocId);
+        saveTOC(toc);
+        loadTOCManagement();
+        alert('TOC item deleted successfully');
+      }
+    }
+
+    document.getElementById('add-exam-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const title = document.getElementById('exam-title').value.trim();
+  const description = document.getElementById('exam-description').value.trim();
+  const pdfFile = document.getElementById('exam-pdf').files[0];
+  const questionCount = parseInt(document.getElementById('exam-questions').value);
+  const timerMinutes = parseInt(document.getElementById('exam-timer').value);
+  
+  // Get correct answers
+  const correctAnswers = {};
+  document.querySelectorAll('.correct-answer').forEach(select => {
+    const questionNum = select.dataset.question;
+    correctAnswers[questionNum] = select.value;
+  });
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('description', description);
+  formData.append('questionCount', questionCount);
+  formData.append('timerMinutes', timerMinutes);
+  formData.append('correctAnswers', JSON.stringify(correctAnswers));
+  formData.append('pdf', pdfFile);
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/exams', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+    
+    if (!response.ok) throw new Error('Failed to add exam');
+    
+    this.reset();
+    document.getElementById('correct-answers-container').classList.add('hidden');
+    await loadStudentExams();
+    alert('Exam added successfully!');
+  } catch (err) {
+    alert(err.message || 'Failed to add exam');
+  }
+});
+    
+
+    // Initialize app
+    function init() {
+  initData();
+  loadStudentExams();
+  loadTOC();
+  loadTOCAdmin(); // This must be called
+  loadYouTubeResources();
+  loadYouTubeResourcesAdmin();
+  updateUI();
+  setupAdminTabs(); // Add this line
+
+  // Remove any other duplicate form listeners
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    handleLogin();
+  });
+  
+  document.getElementById('register-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    handleRegister();
+  });
+}
+    // Start the application
+    init();
+
+// Add this near the top of your <script> in index.html
+  function updateUI() {
+  const user = getSessionUser();
+  const loginBtn = document.getElementById('login-btn');
+  const registerBtn = document.getElementById('register-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const mobileLoginBtn = document.getElementById('mobile-login-btn');
+  const mobileRegisterBtn = document.getElementById('mobile-register-btn');
+  const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+  const navAdminLink = document.getElementById('nav-admin');
+  const mobileNavAdminLink = document.getElementById('mobile-nav-admin');
+  const adminPanel = document.getElementById('admin-panel');
+  const userContent = document.querySelector('.user-content');
+  const welcomeMessage = document.getElementById('welcome-message');
+
+  if (user) {
+    // Hide login/register, show logout
+    loginBtn.classList.add('hidden');
+    registerBtn.classList.add('hidden');
+    logoutBtn.classList.remove('hidden');
+    mobileLoginBtn.classList.add('hidden');
+    mobileRegisterBtn.classList.add('hidden');
+    mobileLogoutBtn.classList.remove('hidden');
+
+    // Show admin panel if admin, else show user content
+    if (user.isAdmin) {
+      navAdminLink.classList.remove('hidden');
+      mobileNavAdminLink.classList.remove('hidden');
+      adminPanel.style.display = 'block';
+      userContent.style.display = 'none';
+      document.body.classList.add('admin-active');
+      if (welcomeMessage) {
+        welcomeMessage.textContent = `Welcome back, Admin ${user.fullName || user.username}! Access the Admin Panel to manage content.`;
+      }
+      loadAdminManagement && loadAdminManagement();
+    } else {
+      navAdminLink.classList.add('hidden');
+      mobileNavAdminLink.classList.add('hidden');
+      adminPanel.style.display = 'none';
+      userContent.style.display = 'block';
+      document.body.classList.remove('admin-active');
+      if (welcomeMessage) {
+        welcomeMessage.textContent = `Welcome back, ${user.fullName || user.username}! Access your review materials below.`;
+      }
+    }
+  } else {
+    // Show login/register, hide logout and admin panel
+    loginBtn.classList.remove('hidden');
+    registerBtn.classList.remove('hidden');
+    logoutBtn.classList.add('hidden');
+    mobileLoginBtn.classList.remove('hidden');
+    mobileRegisterBtn.classList.remove('hidden');
+    mobileLogoutBtn.classList.add('hidden');
+    navAdminLink.classList.add('hidden');
+    mobileNavAdminLink.classList.add('hidden');
+    adminPanel.style.display = 'none';
+    userContent.style.display = 'block';
+    document.body.classList.remove('admin-active');
+    if (welcomeMessage) {
+      welcomeMessage.textContent = 'This platform is designed to help engineering students access comprehensive review materials, exams, and resources uploaded by the admin. Navigate through the sections below to start learning or managing content.';
+    }
+  }
+  window.location.hash = user && user.isAdmin ? '#admin-panel' : '#dashboard';
+}
+
+// Generate answer sheet UI for the given number of questions
+function generateAnswerSheet(questions) {
+  const answerSheet = document.getElementById('answer-sheet');
+  answerSheet.innerHTML = '';
+  for (let i = 1; i <= questions; i++) {
+    const row = document.createElement('div');
+    row.className = 'flex items-center mb-2';
+    row.innerHTML = `
+      <span class="font-semibold mr-3">${i}.</span>
+      <label class="mr-3 flex items-center cursor-pointer">
+        <input type="radio" name="answer_${i}" value="A" class="hidden" />
+        <span class="answer-circle mr-1" data-value="A"></span> A
+      </label>
+      <label class="mr-3 flex items-center cursor-pointer">
+        <input type="radio" name="answer_${i}" value="B" class="hidden" />
+        <span class="answer-circle mr-1" data-value="B"></span> B
+      </label>
+      <label class="mr-3 flex items-center cursor-pointer">
+        <input type="radio" name="answer_${i}" value="C" class="hidden" />
+        <span class="answer-circle mr-1" data-value="C"></span> C
+      </label>
+      <label class="mr-3 flex items-center cursor-pointer">
+        <input type="radio" name="answer_${i}" value="D" class="hidden" />
+        <span class="answer-circle mr-1" data-value="D"></span> D
+      </label>
+    `;
+    answerSheet.appendChild(row);
+  }
+
+  // Add selection logic for custom radio UI
+  answerSheet.querySelectorAll('.answer-circle').forEach(circle => {
+    circle.addEventListener('click', function () {
+      const label = this.closest('label');
+      const input = label.querySelector('input[type="radio"]');
+      input.checked = true;
+      // Remove selected from all answer-circles in this row
+      const row = label.parentNode;
+      row.querySelectorAll('.answer-circle').forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  // Also update .selected when radio is checked (for keyboard accessibility)
+  answerSheet.querySelectorAll('input[type="radio"]').forEach(input => {
+    input.addEventListener('change', function () {
+      const label = this.closest('label');
+      const row = label.parentNode;
+      row.querySelectorAll('.answer-circle').forEach(c => c.classList.remove('selected'));
+      label.querySelector('.answer-circle').classList.add('selected');
+    });
+  });
+}
+
+// Returns an array of selected answers (A/B/C/D or null)
+function getSelectedAnswers(questions) {
+  const answers = [];
+  for (let i = 1; i <= questions; i++) {
+    const checked = document.querySelector(`input[name="answer_${i}"]:checked`);
+    answers.push(checked ? checked.value : null);
+  }
+  return answers;
+}
+
+// Returns true if all questions are answered
+function checkExamCompletion(questions) {
+  for (let i = 1; i <= questions; i++) {
+    if (!document.querySelector(`input[name="answer_${i}"]:checked`)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// ...existing code...
+
+function renderTOCList(tocList) {
+  const tocTable = document.getElementById('toc-list');
+  tocTable.innerHTML = '';
+  tocList.forEach(toc => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="px-6 py-4 whitespace-nowrap">${toc.title}</td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <button class="rename-toc text-blue-600 hover:text-blue-900" data-id="${toc.id}">
+          <i class="fas fa-edit"></i> Rename
+        </button>
+        <button class="delete-toc text-red-600 hover:text-red-900" data-id="${toc.id}">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </td>
+    `;
+    tocTable.appendChild(row);
+  });
+
+  // Add event listeners for rename
+  document.querySelectorAll('.rename-toc').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const tocId = this.getAttribute('data-id');
+      const newTitle = prompt('Enter new title:');
+      if (newTitle && newTitle.trim()) {
+        await renameTOC(tocId, newTitle.trim());
+        loadTOCList();
+      }
+    });
+  });
+
+  // Add event listeners for delete
+  document.querySelectorAll('.delete-toc').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const tocId = this.getAttribute('data-id');
+      if (confirm('Are you sure you want to delete this TOC?')) {
+        await deleteTOC(tocId);
+        loadTOCList();
+      }
+    });
+  });
+}
+
+// Helper functions
+async function renameTOC(tocId, newTitle) {
+  const token = localStorage.getItem('token');
+  await fetch(`/api/toc/${tocId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ title: newTitle }),
+  });
+}
+
+async function deleteTOC(tocId) {
+  const token = localStorage.getItem('token');
+  await fetch(`/api/toc/${tocId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+}
+
+// ...existing code...
+
+// Sidebar navigation for admin panel
+document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    // Remove active from all buttons
+    document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active', 'bg-[var(--accent-color)]'));
+    // Hide all panel contents
+    document.querySelectorAll('.admin-panel-content').forEach(panel => panel.classList.add('hidden'));
+    // Activate this button and show its panel
+    btn.classList.add('active', 'bg-[var(--accent-color)]');
+    document.getElementById(btn.dataset.panel).classList.remove('hidden');
+  });
+});
+// Optionally, show the first panel by default
+document.querySelector('.admin-nav-btn[data-panel="students-panel"]').click();
+
+// --- Add these constants at the top of your script ---
+const STUDENTS_PER_PAGE = 10;
+const SCORES_PER_PAGE = 10;
+let studentsPage = 1;
+let scoresPage = 1;
+
+// --- Update loadStudentsList to support pagination ---
+async function loadStudentsList(page = 1) {
+  const studentsList = document.getElementById('students-list');
+  studentsList.innerHTML = '';
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/users', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch users');
+    const users = await response.json();
+
+    // Filter out admins
+    const students = users.filter(user => !user.isAdmin);
+
+    // Pagination logic
+    const totalPages = Math.ceil(students.length / STUDENTS_PER_PAGE);
+    studentsPage = Math.max(1, Math.min(page, totalPages));
+    const start = (studentsPage - 1) * STUDENTS_PER_PAGE;
+    const end = start + STUDENTS_PER_PAGE;
+    const studentsToShow = students.slice(start, end);
+
+    studentsToShow.forEach(user => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap">${user.full_name || user.fullName || user.username}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${user.email}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${user.address}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <button class="text-red-600 hover:text-red-900 delete-student" data-id="${user.id}">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </td>
+      `;
+      studentsList.appendChild(row);
+    });
+
+    // Add pagination controls
+    let pagination = document.getElementById('students-pagination');
+    if (!pagination) {
+      pagination = document.createElement('div');
+      pagination.id = 'students-pagination';
+      pagination.className = 'flex justify-end items-center mt-2 space-x-2';
+      studentsList.parentNode.appendChild(pagination);
+    }
+    pagination.innerHTML = `
+      <button class="engineering-btn px-4 py-1" ${studentsPage === 1 ? 'disabled' : ''} id="students-prev">Previous</button>
+      <span class="mx-2">Page ${studentsPage} of ${totalPages || 1}</span>
+      <button class="engineering-btn px-4 py-1" ${studentsPage === totalPages || totalPages === 0 ? 'disabled' : ''} id="students-next">Next</button>
+    `;
+    document.getElementById('students-prev').onclick = () => loadStudentsList(studentsPage - 1);
+    document.getElementById('students-next').onclick = () => loadStudentsList(studentsPage + 1);
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-student').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const userId = this.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this student?')) {
+          await deleteStudent(userId);
+          loadStudentsList(studentsPage);
+        }
+      });
+    });
+  } catch (error) {
+    studentsList.innerHTML = `<tr><td colspan="4" class="text-red-600 px-6 py-4">Failed to load students</td></tr>`;
+  }
+}
+
+// --- Update loadExamScores to support pagination ---
+async function loadExamScores(page = 1) {
+  const examScoresList = document.getElementById('exam-scores-list');
+  examScoresList.innerHTML = '';
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/exams/results/all', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch exam scores');
+    const scores = await response.json();
+
+    // Pagination logic
+    const totalPages = Math.ceil(scores.length / SCORES_PER_PAGE);
+    scoresPage = Math.max(1, Math.min(page, totalPages));
+    const start = (scoresPage - 1) * SCORES_PER_PAGE;
+    const end = start + SCORES_PER_PAGE;
+    const scoresToShow = scores.slice(start, end);
+
+    scoresToShow.forEach(score => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap">${score.student_name || score.studentName || score.full_name || score.username}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${score.exam_title || score.examTitle}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${score.score}%</td>
+        <td class="px-6 py-4 whitespace-nowrap">${new Date(score.created_at || score.date).toLocaleDateString()}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <button class="text-red-600 hover:text-red-900 delete-score" data-id="${score.id}">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </td>
+      `;
+      examScoresList.appendChild(row);
+    });
+
+    // Add pagination controls
+    let pagination = document.getElementById('scores-pagination');
+    if (!pagination) {
+      pagination = document.createElement('div');
+      pagination.id = 'scores-pagination';
+      pagination.className = 'flex justify-end items-center mt-2 space-x-2';
+      examScoresList.parentNode.appendChild(pagination);
+    }
+    pagination.innerHTML = `
+      <button class="engineering-btn px-4 py-1" ${scoresPage === 1 ? 'disabled' : ''} id="scores-prev">Previous</button>
+      <span class="mx-2">Page ${scoresPage} of ${totalPages || 1}</span>
+      <button class="engineering-btn px-4 py-1" ${scoresPage === totalPages || totalPages === 0 ? 'disabled' : ''} id="scores-next">Next</button>
+    `;
+    document.getElementById('scores-prev').onclick = () => loadExamScores(scoresPage - 1);
+    document.getElementById('scores-next').onclick = () => loadExamScores(scoresPage + 1);
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-score').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const scoreId = this.getAttribute('data-id');
+        deleteScore(scoreId);
+      });
+    });
+  } catch (error) {
+    examScoresList.innerHTML = `<tr><td colspan="5" class="text-red-600 px-6 py-4">Failed to load exam scores</td></tr>`;
+  }
+}
+
+// ...existing code...
+
+document.getElementById('admin-back-dashboard').addEventListener('click', function (e) {
+  e.preventDefault();
+  document.getElementById('admin-panel').style.display = 'none';
+  document.querySelector('.user-content').style.display = 'block';
+  window.location.hash = '#dashboard';
+});
+
+// ...existing code...
+  </script>
+</body>
+</html>
