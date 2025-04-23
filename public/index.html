@@ -2008,34 +2008,65 @@ document.querySelectorAll('nav a').forEach(link => {
 }
 
 async function handleRegister() {
+  // Get form values
   const fullName = document.getElementById('register-fullname').value.trim();
   const email = document.getElementById('register-email').value.trim();
   const address = document.getElementById('register-address').value.trim();
   const password = document.getElementById('register-password').value;
-  
-  // Generate username from email
-  const username = email.split('@')[0].toLowerCase();
+
+  // Validate inputs
+  if (!fullName || !email || !password) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  // Generate username from email (with fallback)
+  let username = email.split('@')[0].toLowerCase();
+  username = username.replace(/[^a-z0-9]/g, ''); // Remove special chars
+  if (!username) username = `user${Math.floor(Math.random() * 10000)}`; // Fallback
 
   try {
+    // Show loading state
+    const btn = document.querySelector('#register-form button[type="button"]');
+    btn.disabled = true;
+    btn.textContent = 'Registering...';
+
     const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username, password, fullName, email, address }),
+      body: JSON.stringify({ 
+        username, 
+        password, 
+        fullName, 
+        email, 
+        address: address || '' 
+      }),
     });
 
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(data.message || 'Registration failed');
+      throw new Error(
+        data.error || 
+        data.message || 
+        `Registration failed (status ${response.status})`
+      );
     }
 
     alert('Registration successful! You can now log in.');
     showLoginForm();
     document.getElementById('register-form').reset();
+    
   } catch (error) {
-    alert(error.message);
+    console.error('Registration error:', error);
+    alert(`Registration failed: ${error.message}`);
+  } finally {
+    // Reset button state
+    const btn = document.querySelector('#register-form button[type="button"]');
+    btn.disabled = false;
+    btn.textContent = 'Register';
   }
 }
 
