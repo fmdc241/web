@@ -16,7 +16,7 @@ router.route('/')
 
 router.route('/:id')
   .delete(protect, admin, deleteItem)
-  .put(protect, admin, updateTOC); // Single PUT route for /:id
+  .put(protect, admin, updateTOC);
 
 router.route('/category/rename')
   .put(protect, admin, renameCategory);
