@@ -1,6 +1,6 @@
 const app = require('./app');
 const http = require('http');
-const { query } = require('./config/db');
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const express = require('express');
