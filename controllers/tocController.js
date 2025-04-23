@@ -11,6 +11,7 @@ const createItem = async (req, res) => {
       });
     }
 
+    // Create TOC item
     const item = await createTocItem({
       category: req.body.category,
       topic: req.body.topic,
@@ -22,7 +23,6 @@ const createItem = async (req, res) => {
       success: true,
       item
     });
-
   } catch (error) {
     console.error('TOC creation failed:', error);
     res.status(500).json({
