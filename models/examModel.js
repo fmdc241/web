@@ -13,6 +13,12 @@ const getAllExams = async () => {
   return result.rows;
 };
 
+module.exports = {
+  createExam,
+  getAllExams, // Ensure this is exported
+  getExamById,
+  deleteExam,
+};
 const getExamById = async (id) => {
   const result = await db.query('SELECT * FROM exams WHERE id = $1', [id]);
   return result.rows[0];
