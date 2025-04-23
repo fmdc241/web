@@ -8,7 +8,6 @@ const {
   renameCategory,
   removeCategory,
   updateTOC,
-  deleteTOC,
 } = require('../controllers/tocController');
 
 router.route('/')
@@ -17,15 +16,12 @@ router.route('/')
 
 router.route('/:id')
   .delete(protect, admin, deleteItem)
-  .put(protect, admin, updateTOC);
+  .put(protect, admin, updateTOC); // Single PUT route for /:id
 
 router.route('/category/rename')
   .put(protect, admin, renameCategory);
 
 router.route('/category/:category')
   .delete(protect, admin, removeCategory);
-
-router.put('/:id', protect, admin, updateTOC);    // For renaming
-router.delete('/:id', protect, admin, deleteTOC); // For deleting
 
 module.exports = router;
