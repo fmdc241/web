@@ -1361,6 +1361,43 @@ function getYouTubeId(url) {
   return (match && match[2].length === 11) ? match[2] : null;
 }
 
+    async function createExam(examData) {
+  try {
+    // Get token from where you stored it (localStorage, cookies, etc.)
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('No authentication token found. Please log in.');
+    }
+
+    const formData = new FormData();
+    formData.append('pdf', examData.pdfFile);
+    formData.append('title', examData.title);
+    formData.append('description', examData.description);
+    formData.append('questionCount', examData.questionCount);
+    formData.append('correctAnswers', JSON.stringify(examData.correctAnswers));
+
+    const response = await fetch('/api/exams', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`  // Add this header
+      },
+      body: formData  // Don't set Content-Type header for FormData
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to create exam');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Exam creation failed:', error);
+    throw error;
+  }
+}
+
 // Add these functions to your existing JavaScript
 function loadTOC() {
   const toc = getTOC();
