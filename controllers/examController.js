@@ -34,12 +34,6 @@ const getExams = async (req, res) => {
   }
 };
 
-module.exports = {
-  createNewExam,
-  getExams, // Ensure this is exported
-  getExam,
-  removeExam,
-};
 const getExam = async (req, res) => {
   try {
     const { id } = req.params;
@@ -87,6 +81,7 @@ const removeExam = async (req, res) => {
   }
 };
 
+// Export all controllers
 module.exports = {
   createNewExam,
   getExams,
