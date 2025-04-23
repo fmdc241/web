@@ -46,6 +46,33 @@ const createResource = async (req, res) => {
   }
 };
 
+const createYoutubeResource = async (req, res) => {
+  try {
+    const { title, url, videoId } = req.body;
+
+    // Validate required fields
+    if (!title || !url || !videoId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: title, url, videoId'
+      });
+    }
+
+    // Create resource
+    const resource = await createYoutubeResource(title, url, videoId);
+    res.status(201).json({
+      success: true,
+      resource
+    });
+  } catch (error) {
+    console.error('YouTube resource creation failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create YouTube resource'
+    });
+  }
+};
+
 const getResources = async (req, res) => {
   try {
     const resources = await getAllYoutubeResources();
