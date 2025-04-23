@@ -1,6 +1,6 @@
 const express = require('express');
-const path = require('path');
 const router = express.Router();
+const path = require('path');
 const { protect, admin } = require('../middlewares/authMiddleware');
 const {
   createNewExam,
@@ -17,7 +17,7 @@ const {
 router.use(protect);
 
 // Only admins can create/delete exams
-router.post('/', admin, createNewExam);
+router.post('/', admin, createNewExam); // LINE 20 - Error occurs here
 router.delete('/:id', admin, removeExam);
 
 // All authenticated users can access these
