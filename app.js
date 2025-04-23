@@ -16,7 +16,6 @@ app.use(
         scriptSrc: [
           "'self'",
           'https://cdn.tailwindcss.com', // Allow Tailwind CDN
-          "'unsafe-inline'",             // Allow inline scripts (for development)
         ],
         imgSrc: [
           "'self'",
@@ -25,11 +24,10 @@ app.use(
           'https://img.youtube.com',
           'data:',
         ],
-        
         styleSrc: [
           "'self'",
           'https://fonts.googleapis.com',
-          "'unsafe-inline'",
+          "'unsafe-inline'", // Consider removing 'unsafe-inline' for production
         ],
         fontSrc: [
           "'self'",
@@ -40,27 +38,9 @@ app.use(
     },
   })
 );
-
-app.use((err, req, res, next) => {
-  console.error('Global Error:', {
-    timestamp: new Date().toISOString(),
-    path: req.path,
-    method: req.method,
-    error: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    body: req.body,
-    params: req.params
-  });
-  
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { details: err.message })
-  });
-});
 app.use(morgan('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json()); // Parse JSON request bodies
+app.use(express.urlencoded({ extended: false })); // Parse URL-encoded request bodies
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -69,10 +49,29 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Routes
 app.use('/api', require('./routes'));
 
-// Error handling
+// Global Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something broke!' });
+  console.error('Global Error:', {
+    timestamp: new Date().toISOString(),
+    path: req.path,
+    method: req.method,
+    message: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    body: (() => {
+      try {
+        return req.body;
+      } catch {
+        return undefined;
+      }
+    })(),
+    params: req.params,
+  });
+
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
 });
 
 module.exports = app;
