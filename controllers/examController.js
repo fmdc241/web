@@ -31,24 +31,8 @@ const upload = multer({
   fileFilter
 }).single('pdf');
 
-const createNewExam = async (req, res) => {
+const createExam = async (req, res) => {
   try {
-    // Validate admin role
-    if (!req.user?.is_admin) {
-      return res.status(403).json({
-        success: false,
-        error: 'Admin privileges required'
-      });
-    }
-
-    // Validate file upload
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        error: 'No PDF file uploaded'
-      });
-    }
-
     // Validate body parameters
     const required = ['title', 'description', 'questionCount', 'correctAnswers'];
     const missing = required.filter(field => !req.body[field]);
@@ -99,7 +83,7 @@ const createNewExam = async (req, res) => {
       stack: error.stack,
       timestamp: new Date().toISOString()
     });
-    
+
     res.status(500).json({
       success: false,
       error: 'Exam creation failed',
