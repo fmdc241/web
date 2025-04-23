@@ -1361,43 +1361,6 @@ function getYouTubeId(url) {
   return (match && match[2].length === 11) ? match[2] : null;
 }
 
-    async function createExam(examData) {
-  try {
-    // Get token from where you stored it (localStorage, cookies, etc.)
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      throw new Error('No authentication token found. Please log in.');
-    }
-
-    const formData = new FormData();
-    formData.append('pdf', examData.pdfFile);
-    formData.append('title', examData.title);
-    formData.append('description', examData.description);
-    formData.append('questionCount', examData.questionCount);
-    formData.append('correctAnswers', JSON.stringify(examData.correctAnswers));
-
-    const response = await fetch('/api/exams', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`  // Add this header
-      },
-      body: formData  // Don't set Content-Type header for FormData
-    });
-
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to create exam');
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Exam creation failed:', error);
-    throw error;
-  }
-}
-
 // Add these functions to your existing JavaScript
 function loadTOC() {
   const toc = getTOC();
@@ -2045,65 +2008,34 @@ document.querySelectorAll('nav a').forEach(link => {
 }
 
 async function handleRegister() {
-  // Get form values
   const fullName = document.getElementById('register-fullname').value.trim();
   const email = document.getElementById('register-email').value.trim();
   const address = document.getElementById('register-address').value.trim();
   const password = document.getElementById('register-password').value;
-
-  // Validate inputs
-  if (!fullName || !email || !password) {
-    alert('Please fill in all required fields');
-    return;
-  }
-
-  // Generate username from email (with fallback)
-  let username = email.split('@')[0].toLowerCase();
-  username = username.replace(/[^a-z0-9]/g, ''); // Remove special chars
-  if (!username) username = `user${Math.floor(Math.random() * 10000)}`; // Fallback
+  
+  // Generate username from email
+  const username = email.split('@')[0].toLowerCase();
 
   try {
-    // Show loading state
-    const btn = document.querySelector('#register-form button[type="button"]');
-    btn.disabled = true;
-    btn.textContent = 'Registering...';
-
     const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ 
-        username, 
-        password, 
-        fullName, 
-        email, 
-        address: address || '' 
-      }),
+      body: JSON.stringify({ username, password, fullName, email, address }),
     });
 
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(
-        data.error || 
-        data.message || 
-        `Registration failed (status ${response.status})`
-      );
+      throw new Error(data.message || 'Registration failed');
     }
 
     alert('Registration successful! You can now log in.');
     showLoginForm();
     document.getElementById('register-form').reset();
-    
   } catch (error) {
-    console.error('Registration error:', error);
-    alert(`Registration failed: ${error.message}`);
-  } finally {
-    // Reset button state
-    const btn = document.querySelector('#register-form button[type="button"]');
-    btn.disabled = false;
-    btn.textContent = 'Register';
+    alert(error.message);
   }
 }
 
@@ -2139,46 +2071,8 @@ document.getElementById('exam-questions').addEventListener('input', function() {
 });
 
 // Update the exam submission handler
-async function loadExams() {
-  try {
-    // Fetch exams from the backend API
-    const response = await fetch('/api/exams', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authToken}`, // Include this if your API requires auth
-      },
-    });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch exams: ${response.statusText}`);
-    }
 
-    const data = await response.json();
-
-    // Render exams in the frontend
-    const examsList = document.getElementById('exams-list');
-    examsList.innerHTML = ''; // Clear any existing content
-
-    data.exams.forEach((exam) => {
-      const examDiv = document.createElement('div');
-      examDiv.className = 'exam-card';
-      examDiv.innerHTML = `
-        <h3>${exam.title}</h3>
-        <p>${exam.description}</p>
-        <a href="${exam.pdfUrl}" target="_blank">Download PDF</a>
-      `;
-      examsList.appendChild(examDiv);
-    });
-  } catch (error) {
-    console.error('Error loading exams:', error);
-    alert('Failed to load exams. Please try again later.');
-  }
-}
-    document.addEventListener('DOMContentLoaded', () => {
-  loadExams();
-});
-    
 function handleLogout() {
   localStorage.removeItem('token');
   updateUI();
