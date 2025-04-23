@@ -26,14 +26,20 @@ const createNewExam = async (req, res) => {
 
 const getExams = async (req, res) => {
   try {
-    const exams = await getAllExams();
-    res.status(200).json({ message: 'Fetched exams successfully', exams });
+    const exams = await getAllExams(); // Fetch exams from the database
+    res.status(200).json({ exams }); // Send the exams as JSON response
   } catch (error) {
     console.error('Error fetching exams:', error);
     res.status(500).json({ message: 'Error fetching exams' });
   }
 };
 
+module.exports = {
+  createNewExam,
+  getExams, // Ensure this is exported
+  getExam,
+  removeExam,
+};
 const getExam = async (req, res) => {
   try {
     const { id } = req.params;
