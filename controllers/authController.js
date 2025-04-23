@@ -6,54 +6,96 @@ const { createUser, getUserByUsername } = require('../models/userModel');
 // In authController.js
 const registerUser = async (req, res) => {
   try {
-    console.log('Registration attempt:', req.body);
-    
+    console.log('Registration request received:', {
+      username: req.body.username,
+      email: req.body.email,
+      fullName: req.body.fullName
+    });
+
     // Validate input
-    const required = ['username', 'password', 'fullName', 'email'];
-    const missing = required.filter(field => !req.body[field]);
-    if (missing.length) {
+    const requiredFields = ['username', 'password', 'fullName', 'email'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
+      console.log('Missing fields:', missingFields);
       return res.status(400).json({
         success: false,
-        error: `Missing fields: ${missing.join(', ')}`,
-        missingFields: missing
+        error: `Missing required fields: ${missingFields.join(', ')}`,
+        missingFields
       });
     }
 
-    // Check username exists
-    const existing = await getUserByUsername(req.body.username);
-    if (existing) {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(req.body.email)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid email format'
+      });
+    }
+
+    // Check if user exists
+    const existingUser = await getUserByUsername(req.body.username);
+    if (existingUser) {
       return res.status(409).json({
         success: false,
         error: 'Username already exists'
       });
     }
 
-    // Create user
-    const hashedPassword = await bcrypt.hash(req.body.password, 12);
-    const user = await createUser({
-      username: req.body.username,
-      password: hashedPassword,
-      full_name: req.body.fullName,
-      email: req.body.email,
-      address: req.body.address || null,
-      is_admin: false
-    });
-
-    if (!user || !user.id) {
-      throw new Error('User creation returned invalid data');
+    // Check if email exists
+    const existingEmail = await pool.query(
+      'SELECT * FROM users WHERE email = $1', 
+      [req.body.email]
+    );
+    if (existingEmail.rows.length > 0) {
+      return res.status(409).json({
+        success: false,
+        error: 'Email already registered'
+      });
     }
 
+    // Hash password
+    const hashedPassword = await bcrypt.hash(req.body.password, 12);
+    console.log('Password hashed successfully');
+
+    // Create user
+    const newUser = await pool.query(
+      `INSERT INTO users 
+      (username, password, full_name, email, address, is_admin) 
+      VALUES ($1, $2, $3, $4, $5, $6) 
+      RETURNING id, username, email, full_name, is_admin`,
+      [
+        req.body.username,
+        hashedPassword,
+        req.body.fullName,
+        req.body.email,
+        req.body.address || null,
+        false
+      ]
+    );
+
+    if (!newUser.rows[0]) {
+      throw new Error('User creation failed - no data returned');
+    }
+
+    const user = newUser.rows[0];
     console.log('User created successfully:', user.id);
-    
+
     // Generate token
-    const token = generateToken(user.id);
-    
+    const token = jwt.sign(
+      { id: user.id, isAdmin: user.is_admin },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.status(201).json({
       success: true,
       token,
       user: {
         id: user.id,
         username: user.username,
+        fullName: user.full_name,
         email: user.email,
         isAdmin: user.is_admin
       }
@@ -74,7 +116,6 @@ const registerUser = async (req, res) => {
     });
   }
 };
-
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
