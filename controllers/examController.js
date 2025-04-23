@@ -31,81 +31,82 @@ const upload = multer({
   fileFilter
 }).single('pdf');
 
-const createNewExam = (req, res) => {
-  upload(req, res, async (err) => {
-    try {
-      if (err) {
-        console.error('File upload error:', err.message);
-        return res.status(400).json({ 
-          success: false,
-          error: err.message 
-        });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: 'No file uploaded'
-        });
-      }
-
-      const { title, description, questionCount, correctAnswers } = req.body;
-
-      // Validate required fields
-      if (!title || !description || !questionCount || !correctAnswers) {
-        return res.status(400).json({
-          success: false,
-          error: 'Missing required fields'
-        });
-      }
-
-      // Parse and validate correctAnswers
-      let parsedAnswers;
-      try {
-        parsedAnswers = JSON.parse(correctAnswers);
-        if (typeof parsedAnswers !== 'object' || Array.isArray(parsedAnswers)) {
-          throw new Error('Invalid answers format');
-        }
-      } catch (parseError) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid correctAnswers format'
-        });
-      }
-
-      const pdfUrl = `/uploads/${req.file.filename}`;
-
-      const exam = await createExam({
-        title,
-        description,
-        pdfUrl,
-        originalFileName: req.file.originalname,
-        questionCount: parseInt(questionCount),
-        correctAnswers: parsedAnswers
-      });
-
-      console.log(`Exam created: ${exam.id}`);
-      res.status(201).json({
-        success: true,
-        exam
-      });
-
-    } catch (error) {
-      console.error('Exam creation failed:', {
-        error: error.message,
-        stack: error.stack,
-        body: req.body,
-        timestamp: new Date().toISOString()
-      });
-      res.status(500).json({
+const createNewExam = async (req, res) => {
+  try {
+    // Validate admin role
+    if (!req.user?.is_admin) {
+      return res.status(403).json({
         success: false,
-        error: 'Exam creation failed',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: 'Admin privileges required'
       });
     }
-  });
-};
 
+    // Validate file upload
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No PDF file uploaded'
+      });
+    }
+
+    // Validate body parameters
+    const required = ['title', 'description', 'questionCount', 'correctAnswers'];
+    const missing = required.filter(field => !req.body[field]);
+    if (missing.length) {
+      return res.status(400).json({
+        success: false,
+        error: `Missing fields: ${missing.join(', ')}`
+      });
+    }
+
+    // Parse answers
+    let answers;
+    try {
+      answers = JSON.parse(req.body.correctAnswers);
+      if (typeof answers !== 'object' || Array.isArray(answers)) {
+        throw new Error('Invalid format');
+      }
+    } catch (e) {
+      return res.status(400).json({
+        success: false,
+        error: 'correctAnswers must be a valid JSON object'
+      });
+    }
+
+    // Create exam
+    const exam = await createExam({
+      title: req.body.title,
+      description: req.body.description,
+      pdfUrl: `/uploads/${req.file.filename}`,
+      originalFileName: req.file.originalname,
+      questionCount: parseInt(req.body.questionCount),
+      correctAnswers: answers,
+      createdBy: req.user.id
+    });
+
+    res.status(201).json({
+      success: true,
+      exam: {
+        id: exam.id,
+        title: exam.title,
+        pdfUrl: exam.pdfUrl
+      }
+    });
+
+  } catch (error) {
+    console.error('Exam creation failed:', {
+      error: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString()
+    });
+    
+    res.status(500).json({
+      success: false,
+      error: 'Exam creation failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
 const getExams = async (req, res) => {
   try {
     const exams = await getAllExams();
