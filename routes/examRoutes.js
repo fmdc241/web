@@ -13,6 +13,16 @@ const {
   removeExamResult,
 } = require('../controllers/examController');
 
+// Protect all routes
+router.use(protect);
+
+// Only admins can create/delete exams
+router.post('/', admin, createNewExam);
+router.delete('/:id', admin, removeExam);
+
+// All authenticated users can access these
+router.get('/', getExams);
+router.get('/:id', getExam);
 // Serve PDF inline for browser viewing
 router.get('/pdf/:filename', (req, res) => {
   const filePath = path.join(__dirname, '..', 'uploads', req.params.filename);
