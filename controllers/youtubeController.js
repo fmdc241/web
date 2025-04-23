@@ -7,18 +7,42 @@ const extractVideoId = (url) => {
 };
 
 const createResource = async (req, res) => {
-  const { title, url } = req.body;
-  const videoId = extractVideoId(url);
-
-  if (!videoId) {
-    return res.status(400).json({ message: 'Invalid YouTube URL' });
-  }
-
   try {
-    const resource = await createYoutubeResource(title, url, videoId);
-    res.status(201).json(resource);
+    const required = ['title', 'url'];
+    const missing = required.filter(field => !req.body[field]);
+    if (missing.length) {
+      return res.status(400).json({
+        success: false,
+        error: `Missing fields: ${missing.join(', ')}`
+      });
+    }
+
+    const videoId = extractVideoId(req.body.url);
+    if (!videoId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid YouTube URL'
+      });
+    }
+
+    const resource = await createYoutubeResource({
+      title: req.body.title,
+      url: req.body.url,
+      videoId,
+      createdBy: req.user.id
+    });
+
+    res.status(201).json({
+      success: true,
+      resource
+    });
+
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('YouTube resource creation failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create resource'
+    });
   }
 };
 
