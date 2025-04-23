@@ -2892,24 +2892,45 @@ async function deleteStudent(userId) {
   formData.append('pdf', pdfFile);
 
   try {
+    // 1. First verify the token exists
     const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('Please login first - no token found');
+    }
+
+    // 2. Debug: Log the token to console
+    console.log('Using token:', token);
+
+    // 3. Make the request with proper headers
     const response = await fetch('/api/exams', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            // Add this if sending JSON:
+            // 'Content-Type': 'application/json',
+            
+            // Or for FormData:
+            // (no Content-Type - let browser set it automatically)
+        },
+        body: formData // Keep as FormData if that's what your backend expects
     });
-    
-    if (!response.ok) throw new Error('Failed to add exam');
-    
+
+    // 4. Handle non-OK responses
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Backend error:', errorData);
+        throw new Error(errorData.error || 'Failed to add exam');
+    }
+
+    // 5. Success handling
     this.reset();
     document.getElementById('correct-answers-container').classList.add('hidden');
     await loadStudentExams();
     alert('Exam added successfully!');
-  } catch (err) {
+} catch (err) {
+    console.error('Full error:', err);
     alert(err.message || 'Failed to add exam');
-  }
+}
 });
     
 
