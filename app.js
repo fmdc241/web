@@ -40,6 +40,24 @@ app.use(
     },
   })
 );
+
+app.use((err, req, res, next) => {
+  console.error('Global Error:', {
+    timestamp: new Date().toISOString(),
+    path: req.path,
+    method: req.method,
+    error: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    body: req.body,
+    params: req.params
+  });
+  
+  res.status(500).json({
+    success: false,
+    error: 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { details: err.message })
+  });
+});
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
