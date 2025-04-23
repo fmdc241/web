@@ -31,66 +31,6 @@ const upload = multer({
   fileFilter
 }).single('pdf');
 
-const createExam = async (req, res) => {
-  try {
-    // Validate body parameters
-    const required = ['title', 'description', 'questionCount', 'correctAnswers'];
-    const missing = required.filter(field => !req.body[field]);
-    if (missing.length) {
-      return res.status(400).json({
-        success: false,
-        error: `Missing fields: ${missing.join(', ')}`
-      });
-    }
-
-    // Parse answers
-    let answers;
-    try {
-      answers = JSON.parse(req.body.correctAnswers);
-      if (typeof answers !== 'object' || Array.isArray(answers)) {
-        throw new Error('Invalid format');
-      }
-    } catch (e) {
-      return res.status(400).json({
-        success: false,
-        error: 'correctAnswers must be a valid JSON object'
-      });
-    }
-
-    // Create exam
-    const exam = await createExam({
-      title: req.body.title,
-      description: req.body.description,
-      pdfUrl: `/uploads/${req.file.filename}`,
-      originalFileName: req.file.originalname,
-      questionCount: parseInt(req.body.questionCount),
-      correctAnswers: answers,
-      createdBy: req.user.id
-    });
-
-    res.status(201).json({
-      success: true,
-      exam: {
-        id: exam.id,
-        title: exam.title,
-        pdfUrl: exam.pdfUrl
-      }
-    });
-
-  } catch (error) {
-    console.error('Exam creation failed:', {
-      error: error.message,
-      stack: error.stack,
-      timestamp: new Date().toISOString()
-    });
-
-    res.status(500).json({
-      success: false,
-      error: 'Exam creation failed',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-};
 const getExams = async (req, res) => {
   try {
     const exams = await getAllExams();
@@ -310,7 +250,6 @@ const removeExamResult = async (req, res) => {
 };
 
 module.exports = {
-  createNewExam,
   getExams,
   getExam,
   removeExam,
