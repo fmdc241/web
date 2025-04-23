@@ -25,20 +25,10 @@ const deleteTocCategory = async (category) => {
   await db.query('DELETE FROM toc_items WHERE category = $1', [category]);
 };
 
-async function updateTOCById(id, title) {
-  await db.query('UPDATE toc SET title = $1 WHERE id = $2', [title, id]);
-}
-
-async function deleteTOCById(id) {
-  await db.query('DELETE FROM toc WHERE id = $1', [id]);
-}
-
 module.exports = {
   createTocItem,
   getAllTocItems,
   deleteTocItem,
   updateTocCategory,
   deleteTocCategory,
-  updateTOCById,
-  deleteTOCById,
 };
