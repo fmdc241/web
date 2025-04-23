@@ -2139,8 +2139,46 @@ document.getElementById('exam-questions').addEventListener('input', function() {
 });
 
 // Update the exam submission handler
+async function loadExams() {
+  try {
+    // Fetch exams from the backend API
+    const response = await fetch('/api/exams', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`, // Include this if your API requires auth
+      },
+    });
 
+    if (!response.ok) {
+      throw new Error(`Failed to fetch exams: ${response.statusText}`);
+    }
 
+    const data = await response.json();
+
+    // Render exams in the frontend
+    const examsList = document.getElementById('exams-list');
+    examsList.innerHTML = ''; // Clear any existing content
+
+    data.exams.forEach((exam) => {
+      const examDiv = document.createElement('div');
+      examDiv.className = 'exam-card';
+      examDiv.innerHTML = `
+        <h3>${exam.title}</h3>
+        <p>${exam.description}</p>
+        <a href="${exam.pdfUrl}" target="_blank">Download PDF</a>
+      `;
+      examsList.appendChild(examDiv);
+    });
+  } catch (error) {
+    console.error('Error loading exams:', error);
+    alert('Failed to load exams. Please try again later.');
+  }
+}
+    document.addEventListener('DOMContentLoaded', () => {
+  loadExams();
+});
+    
 function handleLogout() {
   localStorage.removeItem('token');
   updateUI();
