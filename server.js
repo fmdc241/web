@@ -6,7 +6,11 @@ const path = require('path');
 const express = require('express');
 require('dotenv').config();
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5000; // Render automatically sets PORT
+
+server.listen(port, '0.0.0.0', () => { // Explicitly listen on all interfaces
+  console.log(`Server running on port ${port}`);
+});
 const server = http.createServer(app);
 
 // REMOVE THIS DUPLICATE POOL CREATION:
