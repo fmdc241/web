@@ -10,9 +10,10 @@ const port = process.env.PORT || 5000;
 const server = http.createServer(app);
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://website_db_h6qu_user:o9Fjbjp3MEU4w4nGTwgQOsFXQxybzcBJ@dpg-d03r8obuibrs73aih370-a/website_db_h6qu',
-  ssl: { rejectUnauthorized: false },
-  searchPath: ['public']
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // Required for Render PostgreSQL
+  }
 });
 
 async function initializeDatabase() {
