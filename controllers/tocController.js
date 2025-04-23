@@ -1,13 +1,34 @@
 const { createTocItem, getAllTocItems, deleteTocItem, updateTocCategory, deleteTocCategory } = require('../models/tocModel');
 
 const createItem = async (req, res) => {
-  const { category, topic, linkUrl } = req.body;
-
   try {
-    const item = await createTocItem(category, topic, linkUrl);
-    res.status(201).json(item);
+    const required = ['category', 'topic', 'linkUrl'];
+    const missing = required.filter(field => !req.body[field]);
+    if (missing.length) {
+      return res.status(400).json({
+        success: false,
+        error: `Missing fields: ${missing.join(', ')}`
+      });
+    }
+
+    const item = await createTocItem({
+      category: req.body.category,
+      topic: req.body.topic,
+      linkUrl: req.body.linkUrl,
+      createdBy: req.user.id
+    });
+
+    res.status(201).json({
+      success: true,
+      item
+    });
+
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('TOC creation failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create TOC item'
+    });
   }
 };
 
