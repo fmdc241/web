@@ -1,22 +1,11 @@
+// config/db.js
 const { Pool } = require('pg');
-require('dotenv').config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { 
-    rejectUnauthorized: false 
-  } : false
+  ssl: {
+    rejectUnauthorized: false // Required for Render PostgreSQL
+  }
 });
 
-// Test connection immediately
-pool.query('SELECT NOW()')
-  .then(() => console.log('Database connected successfully'))
-  .catch(err => {
-    console.error('Database connection failed:', err);
-    process.exit(1);
-  });
-
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-  pool
-};
+module.exports = { pool };
