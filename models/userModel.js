@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const { pool } = require('../config/db');
 const bcrypt = require('bcryptjs');
 
 const createUser = async (username, password, fullName, email, address, isAdmin = false) => {
